@@ -87,8 +87,8 @@ public class MainActivity extends Activity {
     void showHome(){
       base("Омӯзиши забони чинӣ","Аз сифр оғоз кунед • Тоҷикӣ → 中文","home");
       LinearLayout hero=column();hero.setPadding(dp(19),dp(18),dp(19),dp(18));
-      hero.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{Color.rgb(12,104,66),Color.rgb(5,37,27)}));
-      hero.setCornerRadius(dp(22));hero.setStroke(dp(1),GOLD);
+      GradientDrawable heroBg=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{Color.rgb(12,104,66),Color.rgb(5,37,27)});
+      heroBg.setCornerRadius(dp(22));heroBg.setStroke(dp(1),GOLD);hero.setBackground(heroBg);
       hero.addView(label("你好",35,LIME,true));hero.addView(label("Nǐ hǎo  •  Салом!",18,WHITE,true));
       hero.addView(label("Қадами аввал ба забони чинӣ",13,MUTED,false));
       gap(hero,10);
