@@ -11,6 +11,14 @@ android {
         versionCode 1
         versionName '1.0.0'
     }
+    buildTypes {
+        release {
+            // Signed with the standard debug certificate so the APK can be installed for testing.
+            // For Google Play publication, replace this with a private release keystore.
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
