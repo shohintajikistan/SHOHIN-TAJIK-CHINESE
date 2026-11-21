@@ -17,8 +17,8 @@ jobs:
         with:
           gradle-version: '8.9'
       - name: Build APK
-        run: gradle assembleDebug
+        run: gradle assembleRelease
       - uses: actions/upload-artifact@v4
         with:
-          name: SHOHIN-TAJIK-CHINESE-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: SHOHIN-TAJIK-CHINESE-release
+          path: app/build/outputs/apk/release/app-release.apk
