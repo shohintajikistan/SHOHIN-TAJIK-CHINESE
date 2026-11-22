@@ -33,4 +33,63 @@ function toggleFav(h){favs=favs.includes(h)?favs.filter(x=>x!==h):[...favs,h];lo
 function speak(t){if(!('speechSynthesis'in window)){alert('Овоздиҳӣ дар ин браузер дастрас нест');return}let u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';speechSynthesis.speak(u)}
 function renderWords(){let q=(document.getElementById('search')?.value||'').toLowerCase();document.getElementById('words').innerHTML=all.filter(w=>(w.han+w.pin+w.tg).toLowerCase().includes(q)).map(w=>wordCard([w.han,w.pin,w.tg])).join('')||'<p class="muted">Калима ёфт нашуд.</p>'}
 update();renderLessons();
-</script></body></html>
+</script>
+<style>
+#teacherTools{margin-top:18px}.teacher-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.teacher-actions button{min-height:48px}.quiz-option{display:block;width:100%;text-align:left;margin:8px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:#10291f;color:var(--text)}.quiz-option:disabled{opacity:.8}.quiz-option.correct{border-color:var(--lime);color:var(--lime)}.quiz-option.wrong{border-color:#d77b70;color:#ffb3a9}.chat-line{padding:11px 13px;border-radius:14px;margin:8px 0;max-width:92%;white-space:pre-wrap}.chat-user{margin-left:auto;background:#174a35}.chat-bot{background:#10291f;border:1px solid var(--line)}.teacher-small{font-size:12px;color:var(--muted)}
+</style>
+<script>
+(function(){
+const teacherQuestions=[
+{q:'你好 маънои чӣ дорад?',a:['Салом','Ташаккур','Хайр','Бубахшед'],c:0,why:'你好 (Nǐ hǎo) маънои «Салом»-ро дорад.'},
+{q:'Кадом калима маънои «Ташаккур»-ро дорад?',a:['再见','谢谢','你好','妈妈'],c:1,why:'谢谢 (Xièxie) барои изҳори ташаккур истифода мешавад.'},
+{q:'一 кадом рақам аст?',a:['Ду','Се','Як','Панҷ'],c:2,why:'一 (Yī) рақами як аст.'},
+{q:'水 чӣ маъно дорад?',a:['Чой','Об','Қаҳва','Себ'],c:1,why:'水 (Shuǐ) маънои обро дорад.'},
+{q:'我 дар забони чинӣ чӣ маъно дорад?',a:['Ту','Ӯ','Модар','Ман'],c:3,why:'我 (Wǒ) ҷонишини «Ман» аст.'}
+];
+let qi=0,score=0,answered=false;
+const $=id=>document.getElementById(id);
+function addTools(){
+ const ai=$('ai');if(!ai||$('teacherTools'))return;
+ const area=document.createElement('div');area.id='teacherTools';
+ area.innerHTML='<div class="teacher-actions"><button class="secondary" id="startQuiz">Санҷиши дониш · 5 савол</button><button class="secondary" id="resetChat">Тоза кардани чат</button></div><div class="ai-message"><div class="eyebrow">САНҶИШИ ДОНИШ</div><div id="quizStatus" class="teacher-small">Санҷишро оғоз кунед. Натиҷа дар ҳамин телефон нигоҳ дошта мешавад.</div><div id="quizQuestion"></div><div id="quizFeedback" aria-live="polite"></div><button class="primary hide" id="nextQuestion">Саволи навбатӣ →</button></div><div class="ai-message"><div class="eyebrow">СУҲБАТ БО ОМӮЗГОР</div><div id="teacherChat" aria-live="polite"><div class="chat-line chat-bot">Салом! Ман омӯзгори маҳаллии SHOHIN ҳастам. Метавонам калимаҳои дарсҳои дохили барномаро шарҳ диҳам ва туро санҷам.</div></div></div>';
+ $('ai').querySelector('.card').appendChild(area);
+ $('startQuiz').onclick=startQuiz;$('nextQuestion').onclick=nextQuestion;
+ $('resetChat').onclick=()=>{$('teacherChat').innerHTML='<div class="chat-line chat-bot">Чат тоза шуд. Саволи нав диҳед.</div>'};
+}
+function chatReply(raw){
+ const q=raw.toLowerCase().trim();
+ if(/^(салом|привет|hello|你好)/i.test(q))return 'Салом! Имрӯз якчанд калимаи чинӣ меомӯзем. Масалан: 你好 — Nǐ hǎo — Салом.';
+ if(q.includes('тест')||q.includes('санҷ')||q.includes('quiz'))return 'Барои санҷидани дониш тугмаи «Санҷиши дониш · 5 савол»-ро пахш кун.';
+ if(q.includes('пешрафт')||q.includes('балл'))return 'Пешрафти дарсҳо дар қисми «Пешрафт» нигоҳ дошта мешавад. Натиҷаи тест низ дар ҳамин телефон сабт мешавад.';
+ const hit=all.find(w=>q.includes(w.han.toLowerCase())||q.includes(w.pin.toLowerCase())||q.includes(w.tg.toLowerCase()));
+ if(hit)return hit.han+' — '+hit.pin+' — '+hit.tg+'. Ин калима дар дарси «'+lessons[hit.li][0]+'» аст. Барои шунидани талаффуз ба қисми Луғат гузар.';
+ if(q.includes('чӣ тавр')||q.includes('чи тавр'))return 'Қадам ба қадам омӯз: аввал калимаро бин, баъд талаффузро гӯш кун ва дар охир тест супор. Агар савол дар бораи калима бошад, худи калимаи чиниро ё Pinyin-ро навис.';
+ return 'Ман ҳоло дар реҷаи офлайн кор мекунам ва ба маводи дохили барнома такя мекунам. Саволро бо калимаи чинӣ, Pinyin ё маънои тоҷикиаш мушаххастар навис. Барои ҷавобҳои озоди васеътар модели забонии маҳаллӣ бояд илова шавад.';
+}
+window.askTeacher=function(){
+ const el=$('aiQuestion'),raw=(el.value||'').trim();if(!raw)return;
+ const chat=$('teacherChat');if(!chat)return;
+ const u=document.createElement('div');u.className='chat-line chat-user';u.textContent=raw;chat.appendChild(u);
+ const b=document.createElement('div');b.className='chat-line chat-bot';b.textContent=chatReply(raw);chat.appendChild(b);
+ el.value='';chat.scrollTop=chat.scrollHeight;
+};
+function startQuiz(){qi=0;score=0;answered=false;$('quizFeedback').textContent='';$('nextQuestion').classList.add('hide');showQuestion();}
+function showQuestion(){
+ answered=false;const item=teacherQuestions[qi];$('quizStatus').textContent='Саволи '+(qi+1)+' аз '+teacherQuestions.length+' · Хол: '+score;
+ $('quizQuestion').innerHTML='<h3>'+item.q+'</h3>'+item.a.map((a,i)=>'<button class="quiz-option" data-answer="'+i+'">'+a+'</button>').join('');
+ $('quizQuestion').querySelectorAll('button').forEach(btn=>btn.onclick=()=>answer(Number(btn.dataset.answer)));
+}
+function answer(n){if(answered)return;answered=true;const item=teacherQuestions[qi];if(n===item.c)score++;
+ $('quizQuestion').querySelectorAll('button').forEach((btn,i)=>{btn.disabled=true;if(i===item.c)btn.classList.add('correct');else if(i===n)btn.classList.add('wrong')});
+ $('quizFeedback').textContent=item.why;$('quizStatus').textContent='Саволи '+(qi+1)+' аз '+teacherQuestions.length+' · Хол: '+score;
+ $('nextQuestion').classList.remove('hide');$('nextQuestion').textContent=qi===teacherQuestions.length-1?'Натиҷаро бин':'Саволи навбатӣ →';
+}
+function nextQuestion(){if(qi<teacherQuestions.length-1){qi++;$('quizFeedback').textContent='';showQuestion();}else{
+ const result={score,total:teacherQuestions.length,date:new Date().toISOString()};localStorage.setItem('shChineseLastQuiz',JSON.stringify(result));
+ $('quizQuestion').innerHTML='<h3>Натиҷаи тест: '+score+' аз '+teacherQuestions.length+'</h3><p>'+(score===5?'Офарин! Ҳама ҷавобҳо дурустанд.':score>=3?'Натиҷаи хуб. Калимаҳои хато кардаатро такрор кун.':'Боз дарсҳоро омӯз ва такрор кун.')+'</p>';
+ $('quizStatus').textContent='Санҷиш анҷом ёфт';$('quizFeedback').textContent='Натиҷа дар телефон сабт шуд.';$('nextQuestion').classList.add('hide');
+}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addTools);else addTools();
+})();
+</script>
+</body></html>
