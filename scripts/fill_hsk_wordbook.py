@@ -87,17 +87,35 @@ def load_examples():
     print("Matched example sentences:", len(examples), flush=True)
     return examples
 
-def google_call(text, target):
-    query = urllib.parse.urlencode({
-        "client": "gtx", "sl": "auto", "tl": target, "dt": "t", "q": text
-    })
-    url = "https://translate.googleapis.com/translate_a/single?" + query
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=45) as response:
-        data = json.loads(response.read().decode("utf-8"))
-    return "".join(part[0] for part in (data[0] or []) if part and part[0])
+class BrowserTranslator:
+    def __enter__(self):
+        from playwright.sync_api import sync_playwright
+        self.playwright = sync_playwright().start()
+        self.browser = self.playwright.chromium.launch(
+            headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"]
+        )
+        self.page = self.browser.new_page()
+        self.page.goto("https://translate.google.com", wait_until="domcontentloaded", timeout=60000)
+        return self
 
-def translate_batch(texts, target):
+    def call(self, text, target):
+        return self.page.evaluate("""async ({text, target}) => {
+            const params = new URLSearchParams({
+                client: "gtx", sl: "auto", tl: target, dt: "t", q: text
+            });
+            const response = await fetch(
+                "https://translate.googleapis.com/translate_a/single?" + params.toString()
+            );
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            const data = await response.json();
+            return (data[0] || []).map(part => part && part[0] ? part[0] : "").join("");
+        }""", {"text": text, "target": target})
+
+    def __exit__(self, exc_type, exc, tb):
+        self.browser.close()
+        self.playwright.stop()
+
+def translate_batch(texts, target, translator):
     results = []
     batch_size = 18
     for start in range(0, len(texts), batch_size):
@@ -106,7 +124,7 @@ def translate_batch(texts, target):
         translated = None
         for attempt in range(5):
             try:
-                candidate = google_call(packed, target)
+                candidate = translator.call(packed, target)
                 pieces = candidate.split(SEP)
                 if len(pieces) == len(batch):
                     translated = [clean(x) for x in pieces]
@@ -120,7 +138,7 @@ def translate_batch(texts, target):
                 last_error = None
                 for attempt in range(5):
                     try:
-                        translated.append(clean(google_call(item, target)))
+                        translated.append(clean(translator.call(item, target)))
                         last_error = None
                         break
                     except Exception as error:
@@ -193,8 +211,9 @@ def main():
         for r in missing:
             texts.extend([r["meaning_en"], r["example_en"]])
         print("Machine translating", len(texts), "text fields into Tajik and Russian", flush=True)
-        tg = translate_batch(texts, "tg")
-        ru = translate_batch(texts, "ru")
+        with BrowserTranslator() as translator:
+            tg = translate_batch(texts, "tg", translator)
+            ru = translate_batch(texts, "ru", translator)
         for i, record in enumerate(missing):
             record["tajik"] = tg[i * 2] or record["meaning_en"]
             record["example_tajik"] = tg[i * 2 + 1] or record["example_en"]
