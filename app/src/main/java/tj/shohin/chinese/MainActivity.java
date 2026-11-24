@@ -171,12 +171,27 @@ public class MainActivity extends Activity {
     void showHskGroup(int level,int group){
       ArrayList<String[]> chars=charsForLevel(level);int from=group*20,to=Math.min(from+20,chars.size());
       base(levelName(level)+" • "+(group+1),"Гурӯҳи омӯзишӣ","lessons");
-      body.addView(label("Иероглифҳоро бинед ва талаффузи онҳоро гӯш кунед.",13,MUTED,false));
+      body.addView(label("Иероглифҳоро бинед ва талаффузи онҳоро гӯш кунед. Барои баъзе аломатҳо калима ва ҷумлаи намунавӣ низ нишон дода мешавад.",13,MUTED,false));
+      ArrayList<String[]> vocab=wordbook();
       for(int i=from;i<to;i++){
         final String han=chars.get(i)[1];LinearLayout r=row();
         TextView glyph=label(han,34,LIME,true);glyph.setGravity(Gravity.CENTER);r.addView(glyph,new LinearLayout.LayoutParams(dp(70),dp(58)));
         LinearLayout c=column();c.addView(label("Иероглифи чинӣ",13,WHITE,true));c.addView(label("HSK "+chars.get(i)[0].replace("HSK",""),11,MUTED,false));
         r.addView(c,new LinearLayout.LayoutParams(0,-2,1));Button play=action("▶ Овоз",false);play.setOnClickListener(v->speak(han));r.addView(play);card(body,r);
+        int shown=0;
+        for(String[] w:vocab){
+          if(w[0].contains(han)&&shown<2){
+            LinearLayout example=column();
+            example.addView(label("Калима: "+w[0]+"  •  "+w[1],16,LIME,true));
+            example.addView(label("Тоҷикӣ: "+w[2]+"  |  Русский: "+w[3],12,MUTED,false));
+            example.addView(label("Мисол: "+w[4],15,WHITE,true));
+            example.addView(label(w[5],12,GOLD,true));
+            example.addView(label(w[6]+"  /  "+w[7],11,MUTED,false));
+            Button speakExample=action("▶ Гӯш кардани мисол",false);speakExample.setOnClickListener(v->speak(w[4]));example.addView(speakExample);
+            card(body,example);shown++;
+          }
+        }
+        if(shown==0)body.addView(label("Маъно ва мисол барои ин иероглиф ҳанӯз дар луғат илова нашудааст.",11,MUTED,false));
       }
       Button quiz=action("Озмоиши гурӯҳро оғоз кунед",true);quiz.setOnClickListener(v->showHskQuiz(level,group));body.addView(quiz,new LinearLayout.LayoutParams(-1,dp(52)));
     }
@@ -242,20 +257,34 @@ public class MainActivity extends Activity {
       for(String[] l:lessons)for(int j=1;j<l.length;j+=3)list.add(new String[]{l[j],l[j+1],l[j+2]});
       return list;
     }
+    ArrayList<String[]> wordbook(){
+      ArrayList<String[]> out=new ArrayList<>();
+      try(BufferedReader br=new BufferedReader(new InputStreamReader(getAssets().open("hsk_wordbook.tsv"),"UTF-8"))){
+        String line;boolean first=true;
+        while((line=br.readLine())!=null){
+          if(first){first=false;continue;}
+          String[] p=line.split("\\t",-1);
+          if(p.length>=8)out.add(p);
+        }
+      }catch(Exception e){Toast.makeText(this,"Луғат бор нашуд: "+e.getMessage(),Toast.LENGTH_LONG).show();}
+      return out;
+    }
     void showDictionary(){dictionaryScreen(false);}
     void dictionaryScreen(boolean onlyFav){
       base(onlyFav?"Калимаҳои интихобшуда":"Луғати чинӣ",onlyFav?"Калимаҳои нигоҳдошта":"Ҷустуҷӯи чинӣ, Pinyin ё тарҷума","dict");
       EditText search=new EditText(this);search.setSingleLine(true);search.setTextColor(WHITE);search.setHintTextColor(MUTED);
       search.setHint("⌕  Калима ё тарҷумаро ҷустуҷӯ кунед");search.setTextSize(14);search.setPadding(dp(14),dp(10),dp(14),dp(10));
       search.setBackground(shape(PANEL2,14,GOLD));body.addView(search);
-      LinearLayout results=column();body.addView(results);ArrayList<String[]> words=allWords();
+      LinearLayout results=column();body.addView(results);ArrayList<String[]> words=wordbook();
+      body.addView(label("Луғати ибтидоӣ • 46 калима бо Pinyin ва мисолҳои тарҷумашуда",12,GOLD,false));
       Runnable render=()->{
         results.removeAllViews();String q=search.getText().toString().toLowerCase(Locale.ROOT);
         int count=0;
         for(String[] w:words){
           if(onlyFav&&!favorites.contains(w[0]))continue;
-          if(!q.isEmpty()&&!(w[0].toLowerCase(Locale.ROOT).contains(q)||w[1].toLowerCase(Locale.ROOT).contains(q)||w[2].toLowerCase(Locale.ROOT).contains(q)))continue;
-          count++;LinearLayout c=column();c.addView(label(w[0],27,LIME,true));c.addView(label(w[1],14,WHITE,true));c.addView(label(w[2],13,MUTED,false));
+          if(!q.isEmpty()&&!(w[0].toLowerCase(Locale.ROOT).contains(q)||w[1].toLowerCase(Locale.ROOT).contains(q)||w[2].toLowerCase(Locale.ROOT).contains(q)||w[3].toLowerCase(Locale.ROOT).contains(q)||w[4].toLowerCase(Locale.ROOT).contains(q)||w[5].toLowerCase(Locale.ROOT).contains(q)||w[6].toLowerCase(Locale.ROOT).contains(q)||w[7].toLowerCase(Locale.ROOT).contains(q)))continue;
+          count++;LinearLayout c=column();c.addView(label(w[0],27,LIME,true));c.addView(label(w[1],14,WHITE,true));c.addView(label("Тоҷикӣ: "+w[2],13,MUTED,false));c.addView(label("Русский: "+w[3],13,MUTED,false));
+          gap(c,5);c.addView(label("Мисол: "+w[4],17,WHITE,true));c.addView(label(w[5],13,GOLD,true));c.addView(label("Тоҷикӣ: "+w[6],12,MUTED,false));c.addView(label("Русский: "+w[7],12,MUTED,false));
           LinearLayout acts=row();Button play=action("▶  Овоз",false);play.setOnClickListener(v->speak(w[0]));acts.addView(play,new LinearLayout.LayoutParams(0,dp(40),1));
           Button fav=action(favorites.contains(w[0])?"★":"☆",false);fav.setOnClickListener(v->{toggleFavorite(w[0]);dictionaryScreen(onlyFav);});LinearLayout.LayoutParams fp=new LinearLayout.LayoutParams(dp(55),dp(40));fp.leftMargin=dp(8);acts.addView(fav,fp);c.addView(acts);card(results,c);
         }
