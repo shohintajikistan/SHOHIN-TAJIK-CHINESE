@@ -1,0 +1,48 @@
+name: Fill all 11,000 HSK wordbook entries
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/fill_hsk_wordbook.py"
+      - ".github/workflows/fill-wordbook.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate translations and examples for all HSK words
+        run: python scripts/fill_hsk_wordbook.py
+
+      - name: Commit completed wordbook
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/hsk_wordbook.tsv
+          if ! git diff --cached --quiet; then
+            git commit -m "Fill all 11,000 HSK entries with Tajik and Russian"
+            git push
+          else
+            echo "Wordbook already up to date."
+          fi
+
+      - name: Upload generated wordbook
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHOHIN-HSK-11000-wordbook
+          path: app/src/main/assets/hsk_wordbook.tsv
+          if-no-files-found: error
