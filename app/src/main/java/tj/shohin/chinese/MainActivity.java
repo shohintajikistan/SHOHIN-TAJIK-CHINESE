@@ -315,6 +315,7 @@ public class MainActivity extends Activity {
           c.addView(label("HSK "+(level.equals("7")?"7–9":level)+"  •  "+pos,11,GOLD,false));
           if(extra!=null){
             c.addView(label("Тоҷикӣ: "+extra[2],13,MUTED,false));c.addView(label("Русский: "+extra[3],13,MUTED,false));
+            if(extra.length>8){String mark=extra[8].equals("AUTO_TRANSLATED_UNREVIEWED")?"Автоматический перевод • требует проверки":"Редакционный стартовый перевод • требует проверки";c.addView(label(mark,10,GOLD,false));}
             gap(c,5);c.addView(label("Мисол: "+extra[4],16,WHITE,true));c.addView(label(extra[5],12,GOLD,true));
             c.addView(label("Тоҷикӣ: "+extra[6],12,MUTED,false));c.addView(label("Русский: "+extra[7],12,MUTED,false));
           }else{
