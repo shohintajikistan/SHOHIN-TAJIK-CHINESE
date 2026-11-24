@@ -269,25 +269,54 @@ public class MainActivity extends Activity {
       }catch(Exception e){Toast.makeText(this,"Луғат бор нашуд: "+e.getMessage(),Toast.LENGTH_LONG).show();}
       return out;
     }
+    ArrayList<String[]> officialVocabulary(){
+      ArrayList<String[]> out=new ArrayList<>();
+      try(BufferedReader br=new BufferedReader(new InputStreamReader(getAssets().open("hsk_vocabulary.tsv"),"UTF-8"))){
+        String line;boolean first=true;
+        while((line=br.readLine())!=null){
+          if(first){first=false;continue;}
+          String[] p=line.split("\\t",-1);
+          if(p.length>=6)out.add(p);
+        }
+      }catch(Exception e){Toast.makeText(this,"HSK 3.0: "+e.getMessage(),Toast.LENGTH_LONG).show();}
+      return out;
+    }
     void showDictionary(){dictionaryScreen(false);}
     void dictionaryScreen(boolean onlyFav){
-      base(onlyFav?"Калимаҳои интихобшуда":"Луғати чинӣ",onlyFav?"Калимаҳои нигоҳдошта":"Ҷустуҷӯи чинӣ, Pinyin ё тарҷума","dict");
+      base(onlyFav?"Калимаҳои интихобшуда":"Луғати HSK 3.0",onlyFav?"Калимаҳои нигоҳдошта":"Ҷустуҷӯ дар рӯйхати пурраи 11 000 калима","dict");
       EditText search=new EditText(this);search.setSingleLine(true);search.setTextColor(WHITE);search.setHintTextColor(MUTED);
-      search.setHint("⌕  Калима ё тарҷумаро ҷустуҷӯ кунед");search.setTextSize(14);search.setPadding(dp(14),dp(10),dp(14),dp(10));
+      search.setHint("⌕  Калимаи чинӣ, Pinyin ё тарҷумаро нависед");search.setTextSize(14);search.setPadding(dp(14),dp(10),dp(14),dp(10));
       search.setBackground(shape(PANEL2,14,GOLD));body.addView(search);
-      LinearLayout results=column();body.addView(results);ArrayList<String[]> words=wordbook();
-      body.addView(label("Луғати ибтидоӣ • 46 калима бо Pinyin ва мисолҳои тарҷумашуда",12,GOLD,false));
+      body.addView(label("HSK 3.0 • 11 000 калима • 7 гурӯҳ • ҷустуҷӯи офлайн",12,GOLD,false));
+      LinearLayout results=column();body.addView(results);
+      ArrayList<String[]> official=officialVocabulary();ArrayList<String[]> curated=wordbook();
+      HashMap<String,String[]> translated=new HashMap<>();for(String[] w:curated)translated.put(w[0],w);
+      TextView status=label("Барои дидани калимаҳо дар сатри ҷустуҷӯ ҳарф ё Pinyin ворид кунед.",13,MUTED,false);body.addView(status,1);
       Runnable render=()->{
-        results.removeAllViews();String q=search.getText().toString().toLowerCase(Locale.ROOT);
-        int count=0;
-        for(String[] w:words){
-          if(onlyFav&&!favorites.contains(w[0]))continue;
-          if(!q.isEmpty()&&!(w[0].toLowerCase(Locale.ROOT).contains(q)||w[1].toLowerCase(Locale.ROOT).contains(q)||w[2].toLowerCase(Locale.ROOT).contains(q)||w[3].toLowerCase(Locale.ROOT).contains(q)||w[4].toLowerCase(Locale.ROOT).contains(q)||w[5].toLowerCase(Locale.ROOT).contains(q)||w[6].toLowerCase(Locale.ROOT).contains(q)||w[7].toLowerCase(Locale.ROOT).contains(q)))continue;
-          count++;LinearLayout c=column();c.addView(label(w[0],27,LIME,true));c.addView(label(w[1],14,WHITE,true));c.addView(label("Тоҷикӣ: "+w[2],13,MUTED,false));c.addView(label("Русский: "+w[3],13,MUTED,false));
-          gap(c,5);c.addView(label("Мисол: "+w[4],17,WHITE,true));c.addView(label(w[5],13,GOLD,true));c.addView(label("Тоҷикӣ: "+w[6],12,MUTED,false));c.addView(label("Русский: "+w[7],12,MUTED,false));
-          LinearLayout acts=row();Button play=action("▶  Овоз",false);play.setOnClickListener(v->speak(w[0]));acts.addView(play,new LinearLayout.LayoutParams(0,dp(40),1));
-          Button fav=action(favorites.contains(w[0])?"★":"☆",false);fav.setOnClickListener(v->{toggleFavorite(w[0]);dictionaryScreen(onlyFav);});LinearLayout.LayoutParams fp=new LinearLayout.LayoutParams(dp(55),dp(40));fp.leftMargin=dp(8);acts.addView(fav,fp);c.addView(acts);card(results,c);
+        results.removeAllViews();String q=search.getText().toString().toLowerCase(Locale.ROOT).trim();
+        int count=0,shown=0;
+        for(String[] w:official){
+          String word=w[1],pinyin=w[2],pos=w[3],level=w[0];
+          String[] extra=translated.get(word);
+          if(onlyFav&&!favorites.contains(word))continue;
+          String hay=(word+" "+pinyin+" "+pos+" HSK "+(level.equals("7")?"7-9":level)).toLowerCase(Locale.ROOT);
+          if(extra!=null)hay+=" "+extra[2]+" "+extra[3]+" "+extra[4]+" "+extra[6]+" "+extra[7];
+          if(!q.isEmpty()&&!hay.contains(q))continue;
+          count++;if(shown>=80)continue;shown++;
+          String shownWord=word.replaceAll("\\d+$","");
+          LinearLayout c=column();c.addView(label(shownWord,27,LIME,true));c.addView(label(pinyin,14,WHITE,true));
+          c.addView(label("HSK "+(level.equals("7")?"7–9":level)+"  •  "+pos,11,GOLD,false));
+          if(extra!=null){
+            c.addView(label("Тоҷикӣ: "+extra[2],13,MUTED,false));c.addView(label("Русский: "+extra[3],13,MUTED,false));
+            gap(c,5);c.addView(label("Мисол: "+extra[4],16,WHITE,true));c.addView(label(extra[5],12,GOLD,true));
+            c.addView(label("Тоҷикӣ: "+extra[6],12,MUTED,false));c.addView(label("Русский: "+extra[7],12,MUTED,false));
+          }else{
+            c.addView(label("Тарҷума ва ҷумлаи намунавӣ ҳоло ба ин калима илова нашудааст.",12,MUTED,false));
+          }
+          LinearLayout acts=row();Button play=action("▶  Овоз",false);play.setOnClickListener(v->speak(shownWord));acts.addView(play,new LinearLayout.LayoutParams(0,dp(40),1));
+          Button fav=action(favorites.contains(word)?"★":"☆",false);fav.setOnClickListener(v->{toggleFavorite(word);dictionaryScreen(onlyFav);});LinearLayout.LayoutParams fp=new LinearLayout.LayoutParams(dp(55),dp(40));fp.leftMargin=dp(8);acts.addView(fav,fp);c.addView(acts);card(results,c);
         }
+        status.setText(q.isEmpty()?"Барои дидани калимаҳо ҷустуҷӯро оғоз кунед.":"Ёфт шуд: "+count+" • Нишон дода мешавад: "+shown+(count>shown?" • натиҷаҳои дигарро бо дақиқтар кардани ҷустуҷӯ бинед.":""));
         if(count==0)results.addView(label(onlyFav?"Ҳоло калимаи интихобшуда нест":"Калима ёфт нашуд.",14,MUTED,false));
       };
       search.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int st,int c,int a){}public void onTextChanged(CharSequence s,int st,int before,int count){render.run();}public void afterTextChanged(Editable e){}});
