@@ -1,28 +1,46 @@
 # SHOHIN Chinese wordbook — sources and coverage
 
-## Current offline pack
+## Full HSK 3.0 vocabulary reference
+
+File: `app/src/main/assets/hsk_vocabulary.tsv`
+
+The app now includes all 11,000 numbered vocabulary entries from the HSK 3.0 syllabus transcription. Each row preserves:
+- HSK band (1–6 or combined 7–9), assigned by the official syllabus sequence number;
+- Chinese entry, including source disambiguation suffixes where present;
+- tone-marked Pinyin;
+- part of speech;
+- original syllabus sequence number (1–11,000);
+- original level label from the source transcription.
+
+The sequence boundaries are 300, 500, 1,000, 2,000, 3,600, 5,400 and 11,000. The advanced band is one combined HSK 7–9 list.
+
+Source transcription: https://github.com/chelsea6502/hsk-2025-data
+Original syllabus source named by that project: ChineseTest / Center for Language Education and Cooperation, 2025 HSK examination syllabus: https://www.chinesetest.cn/syllabus
+
+The imported file is a structured transcription of the syllabus vocabulary list, not an independently authored SHOHIN list. Source attribution is retained here. The source repository does not provide a clearly stated reuse license in its README; check the original syllabus and applicable dataset permissions before public commercial redistribution.
+
+## Tajik/Russian meanings and examples
 
 File: `app/src/main/assets/hsk_wordbook.tsv`
 
-The first pack contains 46 beginner Chinese words. Each record contains:
-- simplified Chinese headword;
-- tone-marked Hanyu Pinyin;
-- Tajik and Russian glosses;
-- one short Chinese example sentence;
-- Pinyin and Tajik/Russian translations of that sentence.
+The starter pack contains 46 entries with:
+- Chinese headword and tone-marked Pinyin;
+- Tajik and Russian meanings;
+- a Chinese example sentence;
+- sentence Pinyin;
+- Tajik and Russian sentence translations.
 
-The Android dictionary searches all eight learner-facing fields. HSK character group screens show matching word examples when the character occurs in a word in this pack. Characters without a matching entry remain available for recognition and TextToSpeech practice; their dictionary meanings are not fabricated.
+These 46 Tajik/Russian glosses and examples are editorial translations prepared for the app. They are not official HSK translations and have not yet been independently certified by native-speaker reviewers.
 
-## Sources and editorial status
+The app searches all 11,000 official vocabulary entries offline. Where one of the 46 starter entries matches, it also displays its Tajik/Russian meanings and example. Other entries currently show their official Chinese entry, Pinyin, level and part of speech; their Tajik/Russian meanings and examples still need to be added and reviewed.
 
-- HSK 3.0 word membership and level reference: the 2025 HSK syllabus and the public structured transcription at https://github.com/marpalo/hsk-vocabulary-dataset (CC BY 4.0 for its own dataset; CC BY-SA 4.0 applies to CC-CEDICT-derived definitions).
-- Pinyin and lexical sense cross-check reference: CC-CEDICT, https://www.mdbg.net/chinese/dictionary?page=cc-cedict, CC BY-SA 4.0.
-- The Tajik and Russian glosses and example sentences in this initial SHOHIN pack are editorial translations written for this app. They are not represented as official HSK translations or as independently certified native-speaker translations. They should receive native-speaker review before the pack is described as fully verified.
+## Accuracy rules
 
-## Important distinction
+A Chinese character or word may have multiple readings and meanings. Pinyin and meaning must be attached to the word in context, not guessed from an isolated character. Preserve distinct source entries and readings; do not silently merge homographs.
 
-A Chinese character may have multiple readings and meanings. The app therefore teaches it through real words and sentences. A single fixed translation attached to every isolated character would be misleading, especially for polyphonic characters.
+## Related character datasets
 
-## Next coverage targets
+- `hanzi_recognition.tsv`: 3,088 characters for recognition.
+- `hanzi_writing.tsv`: 1,200 characters for writing.
 
-Expand the wordbook across all seven HSK 3.0 bands, preserve multiple readings as separate lexical records, add more example sentences, and keep source/license metadata with every imported dataset. The HSK recognition-character list (3,088 characters) and writing-character list (1,200 characters) remain separate official-syllabus datasets.
+These are separate from the 11,000-word vocabulary list.
