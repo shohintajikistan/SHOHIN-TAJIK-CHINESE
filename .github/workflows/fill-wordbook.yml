@@ -25,6 +25,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install browser-based translation client
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
       - name: Generate translations and examples for all HSK words
         run: python scripts/fill_hsk_wordbook.py
 
