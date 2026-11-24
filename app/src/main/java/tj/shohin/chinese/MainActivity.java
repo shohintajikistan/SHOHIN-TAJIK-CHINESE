@@ -186,9 +186,10 @@ public class MainActivity extends Activity {
       Collections.shuffle(pool);final ArrayList<String> questions=new ArrayList<>(pool.subList(0,Math.min(10,pool.size())));
       final int[] pos={0},score={0};final boolean[] answered={false};
       base("Озмоиши HSK","Шакли дурусти иероглифро интихоб кунед","lessons");
-      TextView counter=label("",13,MUTED,true),target=label("",44,LIME,true),feedback=label("",14,GOLD,true);
+      TextView counter=label("",13,MUTED,true),target=label("▶",38,LIME,true),feedback=label("",14,GOLD,true);
       counter.setGravity(Gravity.CENTER);target.setGravity(Gravity.CENTER);
-      body.addView(counter);card(body,target);body.addView(label("Кадом интихоб айнан ба иероглифи намуна мувофиқ аст?",14,WHITE,true));
+      body.addView(counter);card(body,target);body.addView(label("Овозро гӯш кунед ва иероглифи шунидашударо интихоб кунед.",14,WHITE,true));
+      Button replay=action("▶  Такрори овоз",false);body.addView(replay,new LinearLayout.LayoutParams(-1,dp(44)));
       LinearLayout choices=column();body.addView(choices);body.addView(feedback);
       Runnable[] draw=new Runnable[1];
       draw[0]=()->{
@@ -202,7 +203,7 @@ public class MainActivity extends Activity {
           Button again=action("Боз санҷидан",true);again.setOnClickListener(v->showHskQuiz(level,group));choices.addView(again);
           Button back=action("Ба гурӯҳ баргаштан",false);back.setOnClickListener(v->showHskGroup(level,group));choices.addView(back);return;
         }
-        String answer=questions.get(pos[0]);target.setText(answer);counter.setText("Саволи "+(pos[0]+1)+" аз "+questions.size());
+        String answer=questions.get(pos[0]);target.setText("▶");replay.setOnClickListener(v->speak(answer));speak(answer);counter.setText("Саволи "+(pos[0]+1)+" аз "+questions.size());
         ArrayList<String> opts=new ArrayList<>();opts.add(answer);
         while(opts.size()<4){String candidate=pool.get((int)(Math.random()*pool.size()));if(!opts.contains(candidate))opts.add(candidate);}
         Collections.shuffle(opts);
