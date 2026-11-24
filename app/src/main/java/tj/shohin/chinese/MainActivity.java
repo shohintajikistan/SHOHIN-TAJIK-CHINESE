@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
       go.setOnClickListener(v->showLessons());quick.addView(go,new LinearLayout.LayoutParams(-1,dp(52)));body.addView(quick);
       gap(body,17);body.addView(label("Қисмҳои омӯзиш",18,WHITE,true));
       addFeature("▤","Дарсҳо","6 мавзӯъ • калимаҳо ва ибораҳо",()->showLessons());
-      addFeature("⌕","Луғати чинӣ","Ҷустуҷӯи иероглиф ва тарҷума",()->showDictionary());
+      addFeature("⌕","Луғати HSK 3.0","11 000 калима • Pinyin • ҷустуҷӯи офлайн",()->showDictionary());
       addFeature("✓","Санҷиш","Дониши худро бисанҷед",()->showQuiz());
       addFeature("★","Дастовардҳо","Натиҷа ва пешрафти омӯзиш",()->showProgress());
       gap(body,6);body.addView(label("Маслиҳат: ҳар рӯз 10 дақиқа омӯзед ва калимаҳоро бо овоз такрор кунед.",13,GOLD,false));
@@ -142,7 +142,7 @@ public class MainActivity extends Activity {
     }
     String levelName(int level){return level<6?"HSK "+(level+1):"HSK 7–9";}
     void showLessons(){
-      base("Барномаи HSK 3.0","3 088 иероглиф • рӯйхати расмии сатҳҳо","lessons");
+      base("Барномаи HSK 3.0","3 088 иероглиф • 11 000 калима","lessons");
       ArrayList<String[]> all=hskCharacters();
       body.addView(label("Омӯзиш аз рӯйи рӯйхати HSK 3.0",17,WHITE,true));
       body.addView(label("Иероглифҳо дар гурӯҳҳои 20-тоӣ. Барои ҳар гурӯҳ машқи шинохти шакл ва озмоиш мавҷуд аст.",13,MUTED,false));
