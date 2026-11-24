@@ -41,6 +41,13 @@ public class MainActivity extends Activity {
       tts=new TextToSpeech(this,status->{if(status==TextToSpeech.SUCCESS){int r=tts.setLanguage(Locale.SIMPLIFIED_CHINESE);ttsReady=r!=TextToSpeech.LANG_MISSING_DATA&&r!=TextToSpeech.LANG_NOT_SUPPORTED;}});
       showHome();
     }
+    void speak(String text){
+      if(tts!=null&&ttsReady){
+        tts.speak(text,TextToSpeech.QUEUE_FLUSH,null,"shohin-tts-"+System.nanoTime());
+      }else{
+        Toast.makeText(this,"Барои шунидани чинӣ овози Chinese TTS-ро дар танзимоти телефон насб кунед.",Toast.LENGTH_LONG).show();
+      }
+    }
     int dp(float v){return (int)(v*getResources().getDisplayMetrics().density);}
     GradientDrawable shape(int color,int radius,int stroke){
       GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));
