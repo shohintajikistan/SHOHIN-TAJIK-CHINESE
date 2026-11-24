@@ -4,39 +4,44 @@
 
 File: `app/src/main/assets/hsk_vocabulary.tsv`
 
-The app now includes all 11,000 numbered vocabulary entries from the HSK 3.0 syllabus transcription. Each row preserves:
-- HSK band (1–6 or combined 7–9), assigned by the official syllabus sequence number;
-- Chinese entry, including source disambiguation suffixes where present;
-- tone-marked Pinyin;
-- part of speech;
-- original syllabus sequence number (1–11,000);
-- original level label from the source transcription.
+The app includes all 11,000 numbered vocabulary entries from the selected HSK 3.0 2025 syllabus transcription. Each row preserves the HSK band, Chinese entry, tone-marked Pinyin, part of speech, syllabus sequence number and source level label.
 
 The sequence boundaries are 300, 500, 1,000, 2,000, 3,600, 5,400 and 11,000. The advanced band is one combined HSK 7–9 list.
 
-Source transcription: https://github.com/chelsea6502/hsk-2025-data
-Original syllabus source named by that project: ChineseTest / Center for Language Education and Cooperation, 2025 HSK examination syllabus: https://www.chinesetest.cn/syllabus
+Sources:
+- 2025 syllabus: ChineseTest / Center for Language Education and Cooperation — https://www.chinesetest.cn/syllabus
+- Structured HSK 3.0 2025 vocabulary transcription: https://github.com/chelsea6502/hsk-2025-data
+- An additional CC-CEDICT-derived English gloss dataset used by the wordbook generator: https://github.com/marpalo/hsk-vocabulary-dataset
 
-The imported file is a structured transcription of the syllabus vocabulary list, not an independently authored SHOHIN list. Source attribution is retained here. The source repository does not provide a clearly stated reuse license in its README; check the original syllabus and applicable dataset permissions before public commercial redistribution.
+The marpalo dataset transcription is CC BY 4.0. Its full English definitions derive from CC-CEDICT and are CC BY-SA 4.0. Keep the required attribution and ShareAlike notice when redistributing derived dictionary data. The HSK list remains the selected 2025 11,000-entry list; it is not replaced by the different 2026 HSK list.
 
 ## Tajik/Russian meanings and examples
 
 File: `app/src/main/assets/hsk_wordbook.tsv`
 
-The starter pack contains 46 entries with:
-- Chinese headword and tone-marked Pinyin;
-- Tajik and Russian meanings;
-- a Chinese example sentence;
-- sentence Pinyin;
-- Tajik and Russian sentence translations.
+The completed wordbook is designed to contain one row for each of the 11,000 HSK entries. The first eight columns are:
+1. Chinese headword
+2. Pinyin
+3. Tajik meaning
+4. Russian meaning
+5. Chinese example sentence
+6. Example sentence Pinyin
+7. Tajik example translation
+8. Russian example translation
 
-These 46 Tajik/Russian glosses and examples are editorial translations prepared for the app. They are not official HSK translations and have not yet been independently certified by native-speaker reviewers.
+Two provenance columns follow: `translation_status` and `example_source`. The app reads the first eight columns and continues to work with the added metadata.
 
-The app searches all 11,000 official vocabulary entries offline. Where one of the 46 starter entries matches, it also displays its Tajik/Russian meanings and example. Other entries currently show their official Chinese entry, Pinyin, level and part of speech; their Tajik/Russian meanings and examples still need to be added and reviewed.
+The initial 46 SHOHIN starter entries are retained as editorial content. Remaining English glosses are sourced from CC-CEDICT-derived definitions and machine-translated into Tajik and Russian. Example sentences are taken where possible from the Zhongdex sentence corpus (https://github.com/saymei/zhongdex), which is based on a separate 2026 HSK corpus; these examples are matched to the selected 2025 headwords where possible. When no matching example is available, the generator creates a neutral example sentence and marks its source accordingly.
+
+All automatic Tajik/Russian translations are marked `AUTO_TRANSLATED_UNREVIEWED`. They are not certified translations and require review by fluent speakers before being presented as fully verified educational material. The starter pack is marked separately and is also not independently certified.
+
+The generation script is `scripts/fill_hsk_wordbook.py`; the manual GitHub Actions workflow is `.github/workflows/fill-wordbook.yml`. Translation calls are used only during dataset generation. The resulting TSV is bundled into the Android app, so dictionary lookup and examples work offline at runtime.
+
+The Zhongdex data is licensed CC BY-SA 4.0; its sentence corpus and source attribution must be retained when redistributing derived examples. See https://github.com/saymei/zhongdex/blob/main/NOTICE and https://github.com/saymei/zhongdex/tree/main/data.
 
 ## Accuracy rules
 
-A Chinese character or word may have multiple readings and meanings. Pinyin and meaning must be attached to the word in context, not guessed from an isolated character. Preserve distinct source entries and readings; do not silently merge homographs.
+A Chinese character or word may have multiple readings and meanings. Pinyin and meaning must be attached to the word in context, not guessed from an isolated character. Preserve distinct source entries and readings; do not silently merge homographs. Machine-generated translations and generated fallback examples must remain clearly identified as unreviewed.
 
 ## Related character datasets
 
