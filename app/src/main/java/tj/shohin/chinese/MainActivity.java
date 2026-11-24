@@ -13,6 +13,7 @@ import android.widget.*;
 import android.text.*;
 import android.speech.tts.TextToSpeech;
 import java.util.*;
+import java.io.*;
 
 public class MainActivity extends Activity {
     final int BG=Color.rgb(5,22,17), PANEL=Color.rgb(12,43,32), PANEL2=Color.rgb(17,61,44),
@@ -114,21 +115,103 @@ public class MainActivity extends Activity {
       r.addView(c,new LinearLayout.LayoutParams(0,-2,1));r.addView(label("›",25,GOLD,true));
       card(body,r);r.setOnClickListener(v->click.run());
     }
+    ArrayList<String[]> hskCharacters(){
+      ArrayList<String[]> out=new ArrayList<>();
+      try(BufferedReader br=new BufferedReader(new InputStreamReader(getAssets().open("hanzi_recognition.tsv"),"UTF-8"))){
+        String line;boolean first=true;
+        while((line=br.readLine())!=null){
+          if(first){first=false;continue;}
+          String[] p=line.split("\\t");
+          if(p.length>=2)out.add(new String[]{p[0],p[1]});
+        }
+      }catch(Exception e){Toast.makeText(this,"Файли HSK ёфт нашуд: "+e.getMessage(),Toast.LENGTH_LONG).show();}
+      return out;
+    }
+    ArrayList<String[]> charsForLevel(int level){
+      ArrayList<String[]> all=hskCharacters(),out=new ArrayList<>();
+      String wanted=level<6?"HSK"+(level+1):"HSK7-9";
+      for(String[] item:all)if(item[0].equals(wanted))out.add(item);
+      return out;
+    }
+    String levelName(int level){return level<6?"HSK "+(level+1):"HSK 7–9";}
     void showLessons(){
-      base("Дарсҳои омӯзишӣ","Аз осон ба душвор • 6 мавзӯи асосӣ","lessons");
-      body.addView(label("Сатҳи ибтидоӣ  •  A1",14,GOLD,true));
-      for(int i=0;i<lessons.length;i++){
-        final int n=i;LinearLayout r=row();TextView num=label(String.format(Locale.US,"%02d",i+1),22,GOLD,true);
-        num.setGravity(Gravity.CENTER);r.addView(num,new LinearLayout.LayoutParams(dp(48),dp(48)));
-        LinearLayout c=column();c.addView(label(lessons[i][0],16,WHITE,true));
-        c.addView(label((completed.contains(""+i)?"Анҷом ёфтааст":"Иероглифҳо • талаффуз • тарҷума"),12,MUTED,false));
-        r.addView(c,new LinearLayout.LayoutParams(0,-2,1));r.addView(label(completed.contains(""+i)?"✓":"›",22,completed.contains(""+i)?LIME:GOLD,true));
-        card(body,r);r.setOnClickListener(v->showLesson(n));
+      base("Барномаи HSK 3.0","3 088 иероглиф • рӯйхати расмии сатҳҳо","lessons");
+      ArrayList<String[]> all=hskCharacters();
+      body.addView(label("Омӯзиш аз рӯйи рӯйхати HSK 3.0",17,WHITE,true));
+      body.addView(label("Иероглифҳо дар гурӯҳҳои 20-тоӣ. Барои ҳар гурӯҳ машқи шинохти шакл ва озмоиш мавҷуд аст.",13,MUTED,false));
+      int[] counts={246,125,284,441,431,413,1148};
+      for(int i=0;i<7;i++){
+        final int level=i;int count=counts[i];int groups=(count+19)/20;
+        LinearLayout r=row();TextView n=label(String.format(Locale.US,"%02d",i+1),22,GOLD,true);n.setGravity(Gravity.CENTER);
+        r.addView(n,new LinearLayout.LayoutParams(dp(48),dp(48)));
+        LinearLayout c=column();c.addView(label(levelName(i),16,WHITE,true));
+        c.addView(label(count+" иероглиф • "+groups+" гурӯҳи омӯзишӣ",12,MUTED,false));
+        r.addView(c,new LinearLayout.LayoutParams(0,-2,1));r.addView(label("›",24,GOLD,true));
+        card(body,r);r.setOnClickListener(v->showHskLevel(level));
+      }
+      gap(body,8);
+      body.addView(label("Маълумот: сатҳҳои HSK 7, 8 ва 9 дар рӯйхати 2025 ҳамчун як гурӯҳи умумӣ дода шудаанд.",12,GOLD,false));
+      Button basics=action("Дарсҳои ибтидоии гуфтугӯ",false);
+      basics.setOnClickListener(v->showBasicLessons());body.addView(basics);
+    }
+    void showBasicLessons(){base("Дарсҳои гуфтугӯ","Ибораҳои ҳаррӯза","lessons");
+      for(int i=0;i<lessons.length;i++){final int n=i;LinearLayout r=row();r.addView(label(lessons[i][0],15,WHITE,true),new LinearLayout.LayoutParams(0,dp(48),1));r.addView(label("›",22,GOLD,true));card(body,r);r.setOnClickListener(v->showLesson(n));}
+    }
+    void showHskLevel(int level){
+      ArrayList<String[]> chars=charsForLevel(level);base(levelName(level),"Иероглифҳо ба гурӯҳҳои 20-тоӣ ҷудо шудаанд","lessons");
+      int groups=(chars.size()+19)/20;
+      for(int g=0;g<groups;g++){
+        final int group=g;int from=g*20,to=Math.min(from+20,chars.size());
+        LinearLayout r=row();LinearLayout c=column();c.addView(label("Гурӯҳи "+(g+1),16,WHITE,true));
+        c.addView(label((to-from)+" иероглиф • "+(completed.contains("hsk-"+level+"-"+g)?"Тест гузашта шуд":"Омӯзиш ва тест"),12,MUTED,false));
+        r.addView(c,new LinearLayout.LayoutParams(0,-2,1));r.addView(label("›",23,GOLD,true));card(body,r);
+        r.setOnClickListener(v->showHskGroup(level,group));
       }
     }
-    void speak(String han){
-      if(ttsReady)tts.speak(han,TextToSpeech.QUEUE_FLUSH,null,"shohin_word");
-      else Toast.makeText(this,"Овози чинӣ насб нашудааст. Pinyin-ро хонед.",Toast.LENGTH_LONG).show();
+    void showHskGroup(int level,int group){
+      ArrayList<String[]> chars=charsForLevel(level);int from=group*20,to=Math.min(from+20,chars.size());
+      base(levelName(level)+" • "+(group+1),"Гурӯҳи омӯзишӣ","lessons");
+      body.addView(label("Иероглифҳоро бинед ва талаффузи онҳоро гӯш кунед.",13,MUTED,false));
+      for(int i=from;i<to;i++){
+        final String han=chars.get(i)[1];LinearLayout r=row();
+        TextView glyph=label(han,34,LIME,true);glyph.setGravity(Gravity.CENTER);r.addView(glyph,new LinearLayout.LayoutParams(dp(70),dp(58)));
+        LinearLayout c=column();c.addView(label("Иероглифи чинӣ",13,WHITE,true));c.addView(label("HSK "+chars.get(i)[0].replace("HSK",""),11,MUTED,false));
+        r.addView(c,new LinearLayout.LayoutParams(0,-2,1));Button play=action("▶ Овоз",false);play.setOnClickListener(v->speak(han));r.addView(play);card(body,r);
+      }
+      Button quiz=action("Озмоиши гурӯҳро оғоз кунед",true);quiz.setOnClickListener(v->showHskQuiz(level,group));body.addView(quiz,new LinearLayout.LayoutParams(-1,dp(52)));
+    }
+    void showHskQuiz(int level,int group){
+      ArrayList<String[]> chars=charsForLevel(level);int from=group*20,to=Math.min(from+20,chars.size());
+      ArrayList<String> pool=new ArrayList<>();for(int i=from;i<to;i++)pool.add(chars.get(i)[1]);
+      Collections.shuffle(pool);final ArrayList<String> questions=new ArrayList<>(pool.subList(0,Math.min(10,pool.size())));
+      final int[] pos={0},score={0};final boolean[] answered={false};
+      base("Озмоиши HSK","Шакли дурусти иероглифро интихоб кунед","lessons");
+      TextView counter=label("",13,MUTED,true),target=label("",44,LIME,true),feedback=label("",14,GOLD,true);
+      counter.setGravity(Gravity.CENTER);target.setGravity(Gravity.CENTER);
+      body.addView(counter);card(body,target);body.addView(label("Кадом интихоб айнан ба иероглифи намуна мувофиқ аст?",14,WHITE,true));
+      LinearLayout choices=column();body.addView(choices);body.addView(feedback);
+      Runnable[] draw=new Runnable[1];
+      draw[0]=()->{
+        choices.removeAllViews();feedback.setText("");
+        if(pos[0]>=questions.size()){
+          target.setText(score[0]+" / "+questions.size());
+          counter.setText("Натиҷаи гурӯҳ");
+          boolean passed=score[0]>=questions.size()*0.7;
+          if(passed){completed.add("hsk-"+level+"-"+group);save();}
+          feedback.setText(passed?"Гурӯҳ бомуваффақият анҷом ёфт.":"Барои гузаштан 70% ҷавоби дуруст лозим аст.");
+          Button again=action("Боз санҷидан",true);again.setOnClickListener(v->showHskQuiz(level,group));choices.addView(again);
+          Button back=action("Ба гурӯҳ баргаштан",false);back.setOnClickListener(v->showHskGroup(level,group));choices.addView(back);return;
+        }
+        String answer=questions.get(pos[0]);target.setText(answer);counter.setText("Саволи "+(pos[0]+1)+" аз "+questions.size());
+        ArrayList<String> opts=new ArrayList<>();opts.add(answer);
+        while(opts.size()<4){String candidate=pool.get((int)(Math.random()*pool.size()));if(!opts.contains(candidate))opts.add(candidate);}
+        Collections.shuffle(opts);
+        for(String opt:opts){Button b=action(opt,false);b.setTextSize(22);b.setOnClickListener(v->{if(answered[0])return;answered[0]=true;
+          if(opt.equals(answer)){score[0]++;feedback.setText("Дуруст.");}else feedback.setText("Ҷавоби дуруст: "+answer);
+          Button next=action("Саволи навбатӣ  →",true);choices.addView(next);next.setOnClickListener(x->{pos[0]++;answered[0]=false;draw[0].run();});
+        });choices.addView(b,new LinearLayout.LayoutParams(-1,dp(48)));View gap=new View(this);choices.addView(gap,new LinearLayout.LayoutParams(1,dp(6)));}
+      };
+      draw[0].run();
     }
     void showLesson(int index){
       String[] l=lessons[index];base("Дарси "+(index+1),l[0],"lessons");
