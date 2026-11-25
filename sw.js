@@ -1,4 +1,4 @@
-const CACHE='shohin-chinese-offline-v1';
+const CACHE='shohin-chinese-offline-v2';
 const BASE=self.registration.scope;
 const FILES=[
  BASE,
