@@ -7,6 +7,7 @@ on:
       - 'sw.js'
       - 'assets/**'
       - 'app/src/main/assets/**'
+      - 'scripts/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
@@ -24,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Build separate HSK level downloads
+        run: python3 scripts/build_level_data.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
