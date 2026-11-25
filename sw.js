@@ -2,9 +2,7 @@ const CACHE='shohin-chinese-offline-v1';
 const BASE=self.registration.scope;
 const FILES=[
  BASE,
- new URL('assets/shohin-crown.svg',BASE).href,
- new URL('app/src/main/assets/hsk_vocabulary.tsv',BASE).href,
- new URL('app/src/main/assets/hsk_wordbook.tsv',BASE).href
+ new URL('assets/shohin-crown.svg',BASE).href
 ];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting()));
