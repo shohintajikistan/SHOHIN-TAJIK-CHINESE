@@ -143,7 +143,7 @@ function renderProgress(){
  $('levelProgress').innerHTML=levels.map(lv=>{const n=lv.words.filter(w=>readIds.has(keyOf(w))).length;return '<div class="card"><div class="row"><b>'+esc(lv.name)+'</b><span class="muted">'+n+'/'+lv.words.length+'</span></div><div class="progress"><span style="width:'+(lv.words.length?n/lv.words.length*100:0)+'%"></span></div></div>';}).join('');
 }
 document.addEventListener('click',e=>{
- const t=e.target.closest('[data-action],[data-page],[data-level],[data-lesson],[data-speak],[data-read],#finishLesson');
+ const t=e.target.closest('[data-action],[data-page],[data-level],[data-lesson],[data-speak],[data-read],[data-topic],[data-phrase],#finishLesson');
  if(!t)return;
  if(t.dataset.page){go(t.dataset.page);return;}
  if(t.dataset.action==='levels'){go('levels');return;}
