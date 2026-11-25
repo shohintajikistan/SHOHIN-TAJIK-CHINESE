@@ -40,8 +40,9 @@ const $=id=>document.getElementById(id);
 const LEVEL_NAMES=['HSK 1','HSK 2','HSK 3','HSK 4','HSK 5','HSK 6','HSK 7','HSK 8','HSK 9'];
 const LEVEL_NOTES=['300 калимаи сатҳи аввал','Калимаҳои нави сатҳи дуюм','Калимаҳои нави сатҳи сеюм','Сатҳи миёна','Сатҳи миёнаи боло','Сатҳи пешрафта','Қисми якуми гурӯҳи HSK 7–9','Қисми дуюми гурӯҳи HSK 7–9','Қисми сеюми гурӯҳи HSK 7–9'];
 let words=[],levels=[],lessons=[],currentLevel=0,currentLesson=0;
-let readIds=new Set(JSON.parse(localStorage.getItem('shChineseReadIds')||'[]'));
-let completed=new Set(JSON.parse(localStorage.getItem('shChineseCompletedLessons')||'[]'));
+function readSavedSet(key){try{const value=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(value)?value:[];}catch(e){return [];}}
+let readIds=new Set(readSavedSet('shChineseReadIds'));
+let completed=new Set(readSavedSet('shChineseCompletedLessons'));
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function save(){localStorage.setItem('shChineseReadIds',JSON.stringify([...readIds]));localStorage.setItem('shChineseCompletedLessons',JSON.stringify([...completed]));}
 function parseTSV(text){return text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(Boolean).map(x=>x.split('\t'));}
@@ -104,10 +105,22 @@ function buildLevels(){
  });
 }
 function go(page){
- ['home','levels','lessons','detail','dictionary','conversations','progress'].forEach(id=>$(id).classList.toggle('hide',id!==page));
- document.querySelectorAll('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
- if(page==='home')renderHome();if(page==='levels')renderLevels();if(page==='dictionary')renderDictionary();if(page==='conversations')renderTopics();if(page==='progress')renderProgress();
+ const allowed=['home','levels','lessons','detail','dictionary','conversations','progress'];
+ if(!allowed.includes(page))return;
+ allowed.forEach(id=>{const section=$(id);if(section)section.classList.toggle('hide',id!==page);});
+ document.querySelectorAll('.bottom [data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ try{
+  if(page==='home')renderHome();
+  else if(page==='levels')renderLevels();
+  else if(page==='dictionary')renderDictionary();
+  else if(page==='conversations')renderTopics();
+  else if(page==='progress')renderProgress();
+ }catch(error){console.error('SHOHIN navigation:',error);}
 }
+// Навигатсияи поёнӣ мустақим пайваст мешавад, то пахшҳо гум нашаванд.
+document.querySelectorAll('.bottom [data-page]').forEach(button=>{
+ button.addEventListener('click',event=>{event.preventDefault();go(button.dataset.page);});
+});
 function renderHome(){
  const read=readIds.size,done=completed.size,total=words.length||11000,pct=total?Math.round(read/total*100):0;
  $('overallPct').textContent=pct+'%';$('overallBar').style.width=pct+'%';$('readCount').textContent=read.toLocaleString();$('lessonCount').textContent=done.toLocaleString();$('dictionaryCount').textContent=read.toLocaleString();
@@ -322,9 +335,8 @@ async function toggleAmbient(){
 document.getElementById('musicToggle').addEventListener('click',toggleAmbient);
 
 document.addEventListener('click',e=>{
- const t=e.target.closest('[data-action],[data-page],[data-level],[data-lesson],[data-speak],[data-read],[data-topic],[data-phrase],#finishLesson');
+ const t=e.target.closest('[data-action],[data-level],[data-lesson],[data-speak],[data-read],[data-topic],[data-phrase],#finishLesson');
  if(!t)return;
- if(t.dataset.page){go(t.dataset.page);return;}
  if(t.dataset.action==='levels'){go('levels');return;}
  if(t.dataset.action==='backLessons'){openLevel(currentLevel);return;}if(t.dataset.action==='conversationBack'){renderTopics();return;}if(t.dataset.topic!==undefined){openTopic(Number(t.dataset.topic));return;}if(t.dataset.phrase){speak(t.dataset.phrase);return;}
  if(t.dataset.level!==undefined){openLevel(Number(t.dataset.level));return;}
