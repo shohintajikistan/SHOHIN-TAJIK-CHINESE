@@ -13,10 +13,12 @@ main{padding:8px 15px 100px}.hero,.card{background:linear-gradient(135deg,#174a3
 button{font:inherit;cursor:pointer}.primary{background:var(--lime);color:#102318;font-weight:800;border:0;border-radius:12px;padding:12px 16px}.secondary{background:#10291f;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 13px}.secondary:disabled,.primary:disabled{opacity:.4;cursor:not-allowed}
 .tabs{display:flex;gap:8px;overflow:auto;padding:12px 0}.tab{white-space:nowrap;padding:10px 14px;border-radius:12px;background:#10291f;color:var(--muted);border:1px solid var(--line)}.tab.active{color:var(--lime);border-color:var(--green)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}.tile{background:#10291f;border:1px solid var(--line);padding:15px;border-radius:15px}.tile b{display:block;color:var(--gold);font-size:23px}.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.lesson-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.lesson-row .meta{min-width:0}.lesson-row b{display:block}.pill{font-size:11px;padding:5px 8px;border-radius:99px;background:#193e2d;color:var(--lime);white-space:nowrap}.locked{opacity:.55}.word{padding:14px 0;border-bottom:1px solid var(--line)}.han{font-size:29px;color:var(--gold);line-height:1.25}.pinyin{font-size:16px;font-weight:750;margin:4px 0}.translation{line-height:1.5}.word-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.word-actions button{font-size:12px;padding:8px 10px}.example{margin-top:9px;padding:10px 12px;border-left:2px solid var(--green);background:#071c16;border-radius:0 10px 10px 0;font-size:13px}.hide{display:none!important}.bottom{position:fixed;bottom:0;left:0;right:0;background:#071c16f2;border-top:1px solid var(--line);display:flex;justify-content:center;gap:5px;padding:8px 5px calc(8px + env(safe-area-inset-bottom));z-index:5}.bottom button{background:none;color:var(--muted);padding:7px 9px;border:0;font-size:11px;min-width:58px}.bottom button.active{color:var(--lime)}.bottom span{display:block;font-size:18px;margin-bottom:2px}.notice{padding:12px;border:1px solid #755f2d;background:#332b17;border-radius:12px;color:#f0d994;font-size:12px;line-height:1.5}input{width:100%;padding:13px;border-radius:12px;background:#071c16;border:1px solid var(--line);color:white;font:inherit;margin:8px 0 12px}.status{font-size:13px;color:var(--muted);margin:8px 0}.center{text-align:center}.spinner{width:25px;height:25px;border:3px solid #315643;border-top-color:var(--lime);border-radius:50%;animation:spin .8s linear infinite;margin:15px auto}@keyframes spin{to{transform:rotate(360deg)}}@media(min-width:650px){.hero{padding:27px}.hero h1{font-size:36px}}
-.topic-card{width:100%;text-align:left;color:inherit;transition:transform .18s,border-color .18s;background:linear-gradient(145deg,#153d2d,#0b251b)}.topic-card:active{transform:scale(.985)}.topic-card b{color:var(--gold)}.phrase{padding:13px 0;border-bottom:1px solid var(--line)}.phrase .han{font-size:23px}.phrase button{margin-top:8px}.backline{margin:10px 0}.topic-card .small:last-child{color:var(--accent)}.conversation-tip{border:1px solid #527d70;background:linear-gradient(120deg,#143c30,#10291f);border-radius:14px;padding:12px;margin:12px 0;color:#d5e8df;font-size:13px;line-height:1.5}</style>
+.topic-card{width:100%;text-align:left;color:inherit;transition:transform .18s,border-color .18s;background:linear-gradient(145deg,#153d2d,#0b251b)}.topic-card:active{transform:scale(.985)}.topic-card b{color:var(--gold)}.phrase{padding:13px 0;border-bottom:1px solid var(--line)}.phrase .han{font-size:23px}.phrase button{margin-top:8px}.backline{margin:10px 0}.topic-card .small:last-child{color:var(--accent)}.conversation-tip{border:1px solid #527d70;background:linear-gradient(120deg,#143c30,#10291f);border-radius:14px;padding:12px;margin:12px 0;color:#d5e8df;font-size:13px;line-height:1.5}
+.music-control{position:fixed;right:14px;bottom:78px;z-index:8;display:flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid #b89b4b;border-radius:999px;background:linear-gradient(135deg,#193e2d,#0b2119);color:#f2d98d;box-shadow:0 7px 22px #0008;font-size:12px}.music-control[aria-pressed="true"]{background:linear-gradient(135deg,#6d5821,#263c2c);color:#fff1b8}.music-control .music-dot{width:7px;height:7px;border-radius:50%;background:#a9bdb2}.music-control[aria-pressed="true"] .music-dot{background:#baf05b;box-shadow:0 0 10px #baf05b}</style>
 </head>
 <body>
 <header><div class="mark">冠</div><div><strong>SHOHIN TAJIK–CHINESE</strong><small>SHOHIN TAJIKISTAN</small></div><img class="crown-art" src="assets/shohin-crown.svg" alt="SHOHIN crown with seven stars"></header>
+<button class="music-control" id="musicToggle" type="button" aria-pressed="false" aria-label="Фоновая расслабляющая музыка"><span class="music-dot"></span><span id="musicLabel">♫ Музыка: выкл.</span></button>
 <main>
 <section id="home">
  <div class="hero"><div class="eyebrow">HSK 3.0 · ЗАБОНИ ЧИНӢ</div><h1>Омӯзиши чинӣ<br>дарс ба дарс</h1><p class="muted">Ҳар дарс 15 калима дорад. Калимаҳоро гӯш кунед, хонед ва пас аз анҷом ба дарси навбатӣ гузаред.</p><div class="row"><span class="muted">Пешрафти умумӣ</span><b id="overallPct">0%</b></div><div class="progress"><span id="overallBar"></span></div><button class="primary" data-action="levels">Оғози омӯзиш →</button></div>
@@ -253,6 +255,48 @@ function renderProgress(){
  $('progressBar').style.width=pct+'%';$('progressText').textContent=completed.size+' дарс анҷом ёфт · '+pct+'% аз рӯйхати умумӣ';
  $('levelProgress').innerHTML=levels.map(lv=>{const n=lv.words.filter(w=>readIds.has(keyOf(w))).length;return '<div class="card"><div class="row"><b>'+esc(lv.name)+'</b><span class="muted">'+n+'/'+lv.words.length+'</span></div><div class="progress"><span style="width:'+(lv.words.length?n/lv.words.length*100:0)+'%"></span></div></div>';}).join('');
 }
+
+/* SHOHIN original relaxing ambient music — generated locally, no external track */
+let ambientCtx=null, ambientTimer=null, ambientMaster=null, ambientStep=0;
+const ambientChords=[
+ [261.63,329.63,392.00,493.88],
+ [220.00,261.63,329.63,392.00],
+ [174.61,220.00,261.63,329.63],
+ [196.00,246.94,293.66,392.00]
+];
+function playAmbientChord(){
+ if(!ambientCtx||!ambientMaster)return;
+ const now=ambientCtx.currentTime, chord=ambientChords[ambientStep%ambientChords.length];
+ chord.forEach((hz,i)=>{
+  const osc=ambientCtx.createOscillator(), gain=ambientCtx.createGain();
+  osc.type=i===0?'sine':'triangle';osc.frequency.value=hz;
+  gain.gain.setValueAtTime(0.0001,now);
+  gain.gain.linearRampToValueAtTime(i===0?0.045:0.018,now+2.8);
+  gain.gain.setTargetAtTime(0.0001,now+6.2,1.1);
+  osc.connect(gain);gain.connect(ambientMaster);
+  osc.start(now);osc.stop(now+10);
+ });
+ ambientStep++;
+}
+async function toggleAmbient(){
+ const btn=document.getElementById('musicToggle'),label=document.getElementById('musicLabel');
+ if(ambientTimer){
+  clearInterval(ambientTimer);ambientTimer=null;
+  if(ambientMaster)ambientMaster.gain.setTargetAtTime(0.0001,ambientCtx.currentTime,0.25);
+  btn.setAttribute('aria-pressed','false');label.textContent='♫ Музыка: выкл.';return;
+ }
+ try{
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC){label.textContent='Аудио дастгирӣ намешавад';return;}
+  if(!ambientCtx){ambientCtx=new AC();ambientMaster=ambientCtx.createGain();ambientMaster.gain.value=0.0001;ambientMaster.connect(ambientCtx.destination);}
+  await ambientCtx.resume();
+  ambientMaster.gain.setTargetAtTime(0.72,ambientCtx.currentTime,0.8);
+  playAmbientChord();ambientTimer=setInterval(playAmbientChord,8000);
+  btn.setAttribute('aria-pressed','true');label.textContent='♫ Музыка: вкл.';
+ }catch(err){label.textContent='Овоз дастрас нест';}
+}
+document.getElementById('musicToggle').addEventListener('click',toggleAmbient);
+
 document.addEventListener('click',e=>{
  const t=e.target.closest('[data-action],[data-page],[data-level],[data-lesson],[data-speak],[data-read],[data-topic],[data-phrase],#finishLesson');
  if(!t)return;
