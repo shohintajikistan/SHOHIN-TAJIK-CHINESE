@@ -1,95 +1,157 @@
 <!doctype html>
-<html lang="tg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#071c16"><title>SHOHIN TAJIK–CHINESE</title>
+<html lang="tg">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071c16">
+<title>SHOHIN TAJIK–CHINESE</title>
 <style>
-:root{--bg:#071c16;--panel:#0d3024;--green:#08a56c;--lime:#baf05b;--gold:#e8c66a;--text:#f3f6ef;--muted:#a9bdb2;--line:#24513f}*{box-sizing:border-box}body{margin:0;padding-top:env(safe-area-inset-top);background:radial-gradient(ellipse at top,#164331 0,#071c16 55%);color:var(--text);font:15px system-ui,sans-serif;min-height:100vh}header,main{max-width:900px;margin:auto}header{padding:18px;display:flex;align-items:center;gap:12px}.mark{width:48px;height:48px;border:1px solid var(--gold);border-radius:15px;display:grid;place-items:center;color:var(--gold);font-size:25px}header strong{display:block;letter-spacing:1px}header small{color:var(--muted);letter-spacing:2px}main{padding:8px 16px 100px}.hero,.card{background:linear-gradient(135deg,#174a35,#0d3024);border:1px solid #32634c;border-radius:22px;padding:20px;margin-bottom:14px}.eyebrow{color:var(--lime);font-size:11px;letter-spacing:2px;font-weight:700}.hero h1{font-size:27px;margin:10px 0}.muted{color:var(--muted)}.progress{height:7px;background:#254638;border-radius:10px;margin:12px 0;overflow:hidden}.progress span{display:block;height:100%;background:var(--lime);width:0}.tabs{display:flex;gap:8px;overflow:auto;padding:15px 0}.tab,.secondary{white-space:nowrap;padding:10px 14px;border-radius:12px;background:#10291f;color:var(--muted);border:1px solid var(--line)}.tab.active{color:var(--lime);border-color:var(--green)}button{font:inherit;cursor:pointer}.primary{background:var(--lime);color:#102318;font-weight:800;border:0;border-radius:13px;padding:12px 17px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}.tile{background:#10291f;border:1px solid var(--line);padding:16px;border-radius:16px}.tile b{display:block;color:var(--gold);font-size:23px}.lesson{display:flex;justify-content:space-between;gap:12px;align-items:center}.han{font-size:27px;color:var(--gold)}.word{padding:13px 0;border-bottom:1px solid var(--line)}input{width:100%;padding:13px;border-radius:12px;background:#071c16;border:1px solid var(--line);color:white;font:inherit}.hide{display:none}.bottom{position:fixed;bottom:env(safe-area-inset-bottom);left:0;right:0;background:#071c16ee;border-top:1px solid var(--line);display:flex;justify-content:center;gap:6px;padding:10px}.bottom button{background:none;color:var(--muted);padding:8px;font-size:12px}.bottom button.active{color:var(--lime)}.ai-head{display:flex;align-items:center;gap:12px}.ai-orb{width:48px;height:48px;flex:none;border-radius:16px;background:linear-gradient(145deg,var(--lime),var(--green));color:#071c16;display:grid;place-items:center;font-size:23px;font-weight:900}.ai-message{background:#10291f;border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}.ai-answer{border-left:3px solid var(--lime);padding:10px 12px;margin-top:12px;background:#071c16;border-radius:0 12px 12px 0}.ai-compose{display:flex;gap:8px;margin-top:12px}.ai-compose input{min-width:0}.ai-compose button{flex:none}.ai-hint{font-size:12px;color:var(--muted);line-height:1.5}.bottom{padding-bottom:calc(10px + env(safe-area-inset-bottom))}@media(min-width:650px){.hero{padding:28px}.hero h1{font-size:34px}}
-</style></head><body>
-<header><div class="mark">冠</div><div><strong>SHOHIN TAJIK–CHINESE</strong><small>SHOHIN TAJIKISTAN</small></div></header>
-<main><section id="home"><div class="hero"><div class="eyebrow">ОМӮЗИШИ ЗАБОНИ ЧИНӢ · Аз сифр</div><h1>Забони чиниро<br>қадам ба қадам омӯзед</h1><p class="muted">Ҳар рӯз каме омӯзед. Калимаҳо, талаффуз ва машқҳо — ҳама дар як ҷо.</p><div class="muted">Пешрафти омӯзиш: <b id="pct">0%</b></div><div class="progress"><span id="bar"></span></div><button class="primary" onclick="show('lessons')">Оғози омӯзиш →</button></div><div class="grid"><div class="tile"><b id="done">0</b><span class="muted">Дарсҳои анҷомшуда</span></div><div class="tile"><b id="favcount">0</b><span class="muted">Калимаҳои дӯстдошта</span></div><div class="tile"><b>你好</b><span class="muted">Ni hao — Салом</span></div></div><h3>Идома диҳед</h3><div class="card lesson"><div><div class="eyebrow">ДАРСИ 01</div><b>Салом ва шиносоӣ</b><div class="muted">你好 · Nǐ hǎo</div></div><button class="primary" onclick="openLesson(0)">Омӯзед</button></div></section>
-<section id="lessons" class="hide"><h2>Дарсҳо</h2><p class="muted">Аз дарси якум сар кунед.</p><div id="lessonlist"></div></section>
-<section id="dictionary" class="hide"><h2>Луғат</h2><input id="search" placeholder="Ҷустуҷӯ: чинӣ, pinyin ё тоҷикӣ..." oninput="renderWords()"><div id="words"></div></section>
-<section id="progress" class="hide"><h2>Пешрафти ман</h2><div class="card"><div class="eyebrow">НАТИҶА</div><h1 id="stats">0 аз 6 дарс</h1><div class="progress"><span id="bar2"></span></div><p class="muted">Пешрафт дар ҳамин телефон нигоҳ дошта мешавад.</p></div></section>
-<section id="ai" class="hide"><div class="card"><div class="ai-head"><div class="ai-orb">AI</div><div><div class="eyebrow">SHOHIN AI TEACHER</div><b>Омӯзгори забони чинӣ</b><div class="muted" style="font-size:12px">Реҷаи маҳаллӣ · бе интернет</div></div></div><h2>Салом! Чиро омӯхтан мехоҳед?</h2><p class="muted">Саволи худро дар бораи калимаҳо, маъно ва талаффузи чинӣ нависед.</p><div class="ai-message"><div class="eyebrow">МИСОЛИ САВОЛ</div><b>你好是什么意思?</b><div class="muted">Ин чӣ маъно дорад?</div><div class="ai-answer"><div class="han">你好</div><b>Nǐ hǎo</b><p style="margin:6px 0 0">Салом. Ин ибораи маъмулии салом додан ба забони чинӣ аст.</p></div></div><div class="ai-compose"><input id="aiQuestion" placeholder="Саволи худро нависед..." onkeydown="if(event.key==='Enter')askTeacher()"><button class="primary" onclick="askTeacher()">Пурсидан</button></div><div id="aiReply" aria-live="polite"></div><p class="ai-hint">Эзоҳ: ин реҷаи маҳаллӣ аз луғат ва маводи дарсии дар дохили барнома сабтшуда истифода мебарад. Барои муколамаи озоди зеҳни сунъӣ модели маҳаллӣ бояд алоҳида насб карда шавад.</p></div></section>
-<section id="detail" class="hide"><button class="secondary" onclick="show('lessons')">← Бозгашт</button><div id="lessonbody"></div></section>
-</main><nav class="bottom"><button class="active" onclick="show('home',this)">⌂<br>Асосӣ</button><button onclick="show('lessons',this)">▤<br>Дарсҳо</button><button onclick="show('dictionary',this)">文<br>Луғат</button><button onclick="show('ai',this)">✦<br>SHOHIN AI</button><button onclick="show('progress',this)">◷<br>Пешрафт</button></nav>
-<script>
-const lessons=[
-['Салом ва шиносоӣ',[['你好','Nǐ hǎo','Салом'],['你','Nǐ','Ту'],['我','Wǒ','Ман'],['谢谢','Xièxie','Ташаккур'],['再见','Zàijiàn','Хайр']]],
-['Рақамҳо',[['一','Yī','Як'],['二','Èr','Ду'],['三','Sān','Се'],['四','Sì','Чор'],['五','Wǔ','Панҷ']]],
-['Оила',[['家','Jiā','Оила / хона'],['妈妈','Māma','Модар'],['爸爸','Bàba','Падар'],['哥哥','Gēge','Бародари калон'],['妹妹','Mèimei','Хоҳари хурдӣ']]],
-['Хӯрок ва нӯшокӣ',[['水','Shuǐ','Об'],['茶','Chá','Чой'],['米饭','Mǐfàn','Биринҷ'],['苹果','Píngguǒ','Себ'],['咖啡','Kāfēi','Қаҳва']]],
-['Рангҳо',[['红色','Hóngsè','Сурх'],['绿色','Lǜsè','Сабз'],['白色','Báisè','Сафед'],['黑色','Hēisè','Сиёҳ'],['黄色','Huángsè','Зард']]],
-['Ибораҳои зарурӣ',[['对不起','Duìbuqǐ','Бубахшед'],['没关系','Méi guānxi','Ҳеҷ гап не'],['多少钱？','Duōshao qián?','Чанд пул?'],['我不懂','Wǒ bù dǒng','Ман намефаҳмам'],['请再说一次','Qǐng zài shuō yí cì','Лутфан такрор кунед']]]
-];
-let completed=JSON.parse(localStorage.shDone||'[]'),favs=JSON.parse(localStorage.shFav||'[]');
-const all=lessons.flatMap((l,i)=>l[1].map(w=>({...{han:w[0],pin:w[1],tg:w[2]},li:i})));
-function update(){let p=Math.round(completed.length/6*100);document.getElementById('pct').textContent=p+'%';document.getElementById('bar').style.width=p+'%';document.getElementById('bar2').style.width=p+'%';document.getElementById('done').textContent=completed.length;document.getElementById('favcount').textContent=favs.length;document.getElementById('stats').textContent=completed.length+' аз 6 дарс';}
-function show(id,btn){['home','lessons','dictionary','progress','ai','detail'].forEach(x=>document.getElementById(x).classList.toggle('hide',x!==id));document.querySelectorAll('.bottom button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='lessons')renderLessons();if(id==='dictionary')renderWords();update()}
-function askTeacher(){const el=document.getElementById('aiQuestion'),out=document.getElementById('aiReply');const q=(el.value||'').trim().toLowerCase();if(!q){out.innerHTML='<p class="muted">Аввал савол нависед.</p>';return}const hit=all.find(w=>q.includes(w.han.toLowerCase())||q.includes(w.pin.toLowerCase())||q.includes(w.tg.toLowerCase()));let answer='Ин савол ҳоло дар луғати маҳаллӣ нест. Калимаи чиниро ё Pinyin-и онро нависед.';if(hit){answer='<div class="han">'+hit.han+'</div><b>'+hit.pin+'</b><p style="margin:6px 0 0">'+hit.tg+'</p>'}else if(q.includes('你好')||q.includes('салом')||q.includes('ni hao')){answer='<div class="han">你好</div><b>Nǐ hǎo</b><p style="margin:6px 0 0">Салом. Ибораи маъмулии салом додан.</p>'}out.innerHTML='<div class="ai-answer"><div class="eyebrow">ҶАВОБИ МАҲАЛЛӢ</div>'+answer+'</div>';}
-function renderLessons(){document.getElementById('lessonlist').innerHTML=lessons.map((l,i)=>'<div class="card lesson"><div><div class="eyebrow">ДАРСИ '+String(i+1).padStart(2,'0')+'</div><b>'+l[0]+'</b><div class="muted">5 калима · '+(completed.includes(i)?'Анҷом ёфт':'Омода барои омӯзиш')+'</div></div><button class="primary" onclick="openLesson('+i+')">'+(completed.includes(i)?'Такрор':'Кушодан')+'</button></div>').join('')}
-function openLesson(i){show('detail');let words=lessons[i][1];document.getElementById('lessonbody').innerHTML='<div class="card"><div class="eyebrow">ДАРСИ '+(i+1)+'</div><h2>'+lessons[i][0]+'</h2>'+words.map(w=>wordCard(w)).join('')+'<button class="primary" onclick="finish('+i+')">Дарсро анҷом додам ✓</button></div>'}
-function wordCard(w){let f=favs.includes(w[0]);return '<div class="word lesson"><div><div class="han">'+w[0]+'</div><b>'+w[1]+'</b><div class="muted">'+w[2]+'</div></div><div><button class="secondary" onclick="speak(\''+w[0]+'\')">🔊</button> <button class="secondary" onclick="toggleFav(\''+w[0]+'\')">'+(f?'★':'☆')+'</button></div></div>'}
-function finish(i){if(!completed.includes(i))completed.push(i);localStorage.shDone=JSON.stringify(completed);update();renderLessons();document.getElementById('lessonbody').insertAdjacentHTML('afterbegin','<p style="color:var(--lime)">Дарс сабт шуд.</p>')}
-function toggleFav(h){favs=favs.includes(h)?favs.filter(x=>x!==h):[...favs,h];localStorage.shFav=JSON.stringify(favs);update();renderWords();if(!document.getElementById('detail').classList.contains('hide')){let i=lessons.findIndex(l=>l[1].some(w=>w[0]===h));if(i>=0)openLesson(i)}}
-function speak(t){if(!('speechSynthesis'in window)){alert('Овоздиҳӣ дар ин браузер дастрас нест');return}let u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';speechSynthesis.speak(u)}
-function renderWords(){let q=(document.getElementById('search')?.value||'').toLowerCase();document.getElementById('words').innerHTML=all.filter(w=>(w.han+w.pin+w.tg).toLowerCase().includes(q)).map(w=>wordCard([w.han,w.pin,w.tg])).join('')||'<p class="muted">Калима ёфт нашуд.</p>'}
-update();renderLessons();
-</script>
-<style>
-#teacherTools{margin-top:18px}.teacher-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.teacher-actions button{min-height:48px}.quiz-option{display:block;width:100%;text-align:left;margin:8px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:#10291f;color:var(--text)}.quiz-option:disabled{opacity:.8}.quiz-option.correct{border-color:var(--lime);color:var(--lime)}.quiz-option.wrong{border-color:#d77b70;color:#ffb3a9}.chat-line{padding:11px 13px;border-radius:14px;margin:8px 0;max-width:92%;white-space:pre-wrap}.chat-user{margin-left:auto;background:#174a35}.chat-bot{background:#10291f;border:1px solid var(--line)}.teacher-small{font-size:12px;color:var(--muted)}
+:root{--bg:#071c16;--panel:#0d3024;--panel2:#123b2b;--green:#08a56c;--lime:#baf05b;--gold:#e8c66a;--text:#f3f6ef;--muted:#a9bdb2;--line:#28533f;--red:#e28a7d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#164331 0,#071c16 58%);color:var(--text);font:15px system-ui,-apple-system,sans-serif;min-height:100vh}
+header,main{max-width:900px;margin:auto}header{padding:17px 18px;display:flex;align-items:center;gap:12px}.mark{width:48px;height:48px;border:1px solid var(--gold);border-radius:15px;display:grid;place-items:center;color:var(--gold);font-size:25px}header strong{display:block;letter-spacing:1px}header small{color:var(--muted);letter-spacing:2px}
+main{padding:8px 15px 100px}.hero,.card{background:linear-gradient(135deg,#174a35,#0d3024);border:1px solid #32634c;border-radius:21px;padding:19px;margin-bottom:13px}.eyebrow{color:var(--lime);font-size:11px;letter-spacing:1.7px;font-weight:800}.hero h1{font-size:28px;line-height:1.2;margin:10px 0}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted);line-height:1.5}
+.progress{height:7px;background:#254638;border-radius:10px;margin:10px 0;overflow:hidden}.progress span{display:block;height:100%;background:var(--lime);width:0;transition:width .25s}
+button{font:inherit;cursor:pointer}.primary{background:var(--lime);color:#102318;font-weight:800;border:0;border-radius:12px;padding:12px 16px}.secondary{background:#10291f;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 13px}.secondary:disabled,.primary:disabled{opacity:.4;cursor:not-allowed}
+.tabs{display:flex;gap:8px;overflow:auto;padding:12px 0}.tab{white-space:nowrap;padding:10px 14px;border-radius:12px;background:#10291f;color:var(--muted);border:1px solid var(--line)}.tab.active{color:var(--lime);border-color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}.tile{background:#10291f;border:1px solid var(--line);padding:15px;border-radius:15px}.tile b{display:block;color:var(--gold);font-size:23px}.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.lesson-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.lesson-row .meta{min-width:0}.lesson-row b{display:block}.pill{font-size:11px;padding:5px 8px;border-radius:99px;background:#193e2d;color:var(--lime);white-space:nowrap}.locked{opacity:.55}.word{padding:14px 0;border-bottom:1px solid var(--line)}.han{font-size:29px;color:var(--gold);line-height:1.25}.pinyin{font-size:16px;font-weight:750;margin:4px 0}.translation{line-height:1.5}.word-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.word-actions button{font-size:12px;padding:8px 10px}.example{margin-top:9px;padding:10px 12px;border-left:2px solid var(--green);background:#071c16;border-radius:0 10px 10px 0;font-size:13px}.hide{display:none!important}.bottom{position:fixed;bottom:0;left:0;right:0;background:#071c16f2;border-top:1px solid var(--line);display:flex;justify-content:center;gap:5px;padding:8px 5px calc(8px + env(safe-area-inset-bottom));z-index:5}.bottom button{background:none;color:var(--muted);padding:7px 9px;border:0;font-size:11px;min-width:58px}.bottom button.active{color:var(--lime)}.bottom span{display:block;font-size:18px;margin-bottom:2px}.notice{padding:12px;border:1px solid #755f2d;background:#332b17;border-radius:12px;color:#f0d994;font-size:12px;line-height:1.5}input{width:100%;padding:13px;border-radius:12px;background:#071c16;border:1px solid var(--line);color:white;font:inherit;margin:8px 0 12px}.status{font-size:13px;color:var(--muted);margin:8px 0}.center{text-align:center}.spinner{width:25px;height:25px;border:3px solid #315643;border-top-color:var(--lime);border-radius:50%;animation:spin .8s linear infinite;margin:15px auto}@keyframes spin{to{transform:rotate(360deg)}}@media(min-width:650px){.hero{padding:27px}.hero h1{font-size:36px}}
 </style>
+</head>
+<body>
+<header><div class="mark">冠</div><div><strong>SHOHIN TAJIK–CHINESE</strong><small>SHOHIN TAJIKISTAN</small></div></header>
+<main>
+<section id="home">
+ <div class="hero"><div class="eyebrow">HSK 3.0 · ЗАБОНИ ЧИНӢ</div><h1>Омӯзиши чинӣ<br>дарс ба дарс</h1><p class="muted">Ҳар дарс 15 калима дорад. Калимаҳоро гӯш кунед, хонед ва пас аз анҷом ба дарси навбатӣ гузаред.</p><div class="row"><span class="muted">Пешрафти умумӣ</span><b id="overallPct">0%</b></div><div class="progress"><span id="overallBar"></span></div><button class="primary" data-action="levels">Оғози омӯзиш →</button></div>
+ <div class="grid"><div class="tile"><b id="readCount">0</b><span class="muted">Калимаҳои хондашуда</span></div><div class="tile"><b id="lessonCount">0</b><span class="muted">Дарсҳои анҷомшуда</span></div><div class="tile"><b id="dictionaryCount">0</b><span class="muted">Калимаҳо дар луғат</span></div></div>
+ <div class="card"><div class="eyebrow">ҚОИДАИ ОМӮЗИШ</div><p>Барои кушодани дарси навбатӣ ҳамаи 15 калимаи дарси ҷориро хонед ва ҳамчун «Хондам» қайд кунед. Ҳар калимаи хондашуда фавран ба луғати шахсӣ дохил мешавад.</p></div>
+ <div id="loadStatus" class="card"><div class="spinner"></div><p class="center muted">Рӯйхати 11 000 калима бор шуда истодааст…</p></div>
+</section>
+<section id="levels" class="hide"><div class="row"><h2>Сатҳҳои омӯзиш</h2><span class="pill" id="levelsTotal">9 сатҳ</span></div><p class="muted">Аз HSK 1 сар кунед. Сатҳҳои навбатӣ баъди анҷоми дарсҳои қаблӣ кушода мешаванд.</p><div id="levelList"></div><div class="notice">Эзоҳ: рӯйхати интихобшудаи HSK 3.0 барои сатҳҳои 7–9 як гурӯҳи умумии пешрафта дорад. SHOHIN онро ба се қисми омӯзишӣ ҷудо мекунад; ин тақсимоти дохилии барнома аст, на рӯйхати расмии алоҳидаи HSK 7, 8 ва 9.</div></section>
+<section id="lessons" class="hide"><button class="secondary" data-action="levels">← Сатҳҳо</button><h2 id="lessonsTitle">Дарсҳо</h2><p class="muted" id="lessonsSubtitle"></p><div id="lessonList"></div></section>
+<section id="detail" class="hide"><button class="secondary" data-action="backLessons">← Бозгашт ба дарсҳо</button><div id="lessonDetail"></div></section>
+<section id="dictionary" class="hide"><h2>Луғати ман</h2><p class="muted">Дар ин ҷо танҳо калимаҳое пайдо мешаванд, ки шумо хондаед.</p><input id="dictSearch" placeholder="Ҷустуҷӯ: иероглиф, Pinyin, тоҷикӣ ё русӣ"><div id="dictionaryList"></div></section>
+<section id="progress" class="hide"><h2>Пешрафти ман</h2><div class="card"><div class="eyebrow">НАТИҶА</div><h2 id="progressSummary">0 калима аз 11 000</h2><div class="progress"><span id="progressBar"></span></div><p class="muted" id="progressText">Ҳоло ягон дарс анҷом нашудааст.</p></div><div id="levelProgress"></div></section>
+</main>
+<nav class="bottom"><button class="active" data-page="home"><span>⌂</span>Асосӣ</button><button data-page="levels"><span>▤</span>Дарсҳо</button><button data-page="dictionary"><span>文</span>Луғат</button><button data-page="progress"><span>◷</span>Пешрафт</button></nav>
 <script>
 (function(){
-const teacherQuestions=[
-{q:'你好 маънои чӣ дорад?',a:['Салом','Ташаккур','Хайр','Бубахшед'],c:0,why:'你好 (Nǐ hǎo) маънои «Салом»-ро дорад.'},
-{q:'Кадом калима маънои «Ташаккур»-ро дорад?',a:['再见','谢谢','你好','妈妈'],c:1,why:'谢谢 (Xièxie) барои изҳори ташаккур истифода мешавад.'},
-{q:'一 кадом рақам аст?',a:['Ду','Се','Як','Панҷ'],c:2,why:'一 (Yī) рақами як аст.'},
-{q:'水 чӣ маъно дорад?',a:['Чой','Об','Қаҳва','Себ'],c:1,why:'水 (Shuǐ) маънои обро дорад.'},
-{q:'我 дар забони чинӣ чӣ маъно дорад?',a:['Ту','Ӯ','Модар','Ман'],c:3,why:'我 (Wǒ) ҷонишини «Ман» аст.'}
-];
-let qi=0,score=0,answered=false;
+'use strict';
 const $=id=>document.getElementById(id);
-function addTools(){
- const ai=$('ai');if(!ai||$('teacherTools'))return;
- const area=document.createElement('div');area.id='teacherTools';
- area.innerHTML='<div class="teacher-actions"><button class="secondary" id="startQuiz">Санҷиши дониш · 5 савол</button><button class="secondary" id="resetChat">Тоза кардани чат</button></div><div class="ai-message"><div class="eyebrow">САНҶИШИ ДОНИШ</div><div id="quizStatus" class="teacher-small">Санҷишро оғоз кунед. Натиҷа дар ҳамин телефон нигоҳ дошта мешавад.</div><div id="quizQuestion"></div><div id="quizFeedback" aria-live="polite"></div><button class="primary hide" id="nextQuestion">Саволи навбатӣ →</button></div><div class="ai-message"><div class="eyebrow">СУҲБАТ БО ОМӮЗГОР</div><div id="teacherChat" aria-live="polite"><div class="chat-line chat-bot">Салом! Ман омӯзгори маҳаллии SHOHIN ҳастам. Метавонам калимаҳои дарсҳои дохили барномаро шарҳ диҳам ва туро санҷам.</div></div></div>';
- $('ai').querySelector('.card').appendChild(area);
- $('startQuiz').onclick=startQuiz;$('nextQuestion').onclick=nextQuestion;
- $('resetChat').onclick=()=>{$('teacherChat').innerHTML='<div class="chat-line chat-bot">Чат тоза шуд. Саволи нав диҳед.</div>'};
+const LEVEL_NAMES=['HSK 1','HSK 2','HSK 3','HSK 4','HSK 5','HSK 6','HSK 7','HSK 8','HSK 9'];
+const LEVEL_NOTES=['300 калимаи сатҳи аввал','Калимаҳои нави сатҳи дуюм','Калимаҳои нави сатҳи сеюм','Сатҳи миёна','Сатҳи миёнаи боло','Сатҳи пешрафта','Қисми якуми гурӯҳи HSK 7–9','Қисми дуюми гурӯҳи HSK 7–9','Қисми сеюми гурӯҳи HSK 7–9'];
+let words=[],levels=[],lessons=[],currentLevel=0,currentLesson=0;
+let readIds=new Set(JSON.parse(localStorage.getItem('shChineseReadIds')||'[]'));
+let completed=new Set(JSON.parse(localStorage.getItem('shChineseCompletedLessons')||'[]'));
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function save(){localStorage.setItem('shChineseReadIds',JSON.stringify([...readIds]));localStorage.setItem('shChineseCompletedLessons',JSON.stringify([...completed]));}
+function parseTSV(text){return text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(Boolean).map(x=>x.split('\t'));}
+function keyOf(w){return w.id;}
+function lessonId(li,si){return li+':'+si;}
+function isComplete(li,si){return completed.has(lessonId(li,si));}
+function allPreviousDone(globalIndex){return globalIndex===0||completed.has(lessons[globalIndex-1].id);}
+function speak(text){if(!('speechSynthesis'in window)){alert('Ин браузер талаффузи овозиро дастгирӣ намекунад.');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='zh-CN';u.rate=.82;speechSynthesis.speak(u);}
+async function loadData(){
+ try{
+  const [vRes,wRes]=await Promise.all([fetch('app/src/main/assets/hsk_vocabulary.tsv'),fetch('app/src/main/assets/hsk_wordbook.tsv')]);
+  if(!vRes.ok||!wRes.ok)throw new Error('Файлҳои луғат аз GitHub Pages дастрас нестанд.');
+  const [vText,wText]=await Promise.all([vRes.text(),wRes.text()]);
+  const vRows=parseTSV(vText),wRows=parseTSV(wText),wordMap=new Map();
+  wRows.slice(1).forEach(r=>{if(r.length>=4){const k=r[0]+'|'+r[1].toLowerCase();wordMap.set(k,{tg:r[2]||'',ru:r[3]||'',example:r[4]||'',examplePin:r[5]||'',exampleTg:r[6]||'',exampleRu:r[7]||'',translationStatus:r[8]||''});}});
+  words=vRows.slice(1).map((r,i)=>{
+   const sourceLevel=Number(r[0]);const han=r[1]||'',pin=r[2]||'';const extra=wordMap.get(han+'|'+pin.toLowerCase())||{};
+   return {id:sourceLevel+':'+(r[4]||i),sourceLevel,han,pin,pos:r[3]||'',tg:extra.tg||'Тарҷума ҳоло дастрас нест',ru:extra.ru||'Перевод пока отсутствует',example:extra.example||'',examplePin:extra.examplePin||'',exampleTg:extra.exampleTg||'',exampleRu:extra.exampleRu||'',translationStatus:extra.translationStatus||''};
+  });
+  buildLevels();$('loadStatus').classList.add('hide');renderHome();renderLevels();
+ }catch(e){$('loadStatus').innerHTML='<div class="eyebrow">ХАТОИ БОРКУНӢ</div><p>'+esc(e.message)+'</p><p class="small">Веб-сайт бояд аз GitHub Pages кушода шавад. Агар ин паём боқӣ монад, саҳифаро нав кунед.</p>';}
 }
-function chatReply(raw){
- const q=raw.toLowerCase().trim();
- if(/^(салом|привет|hello|你好)/i.test(q))return 'Салом! Имрӯз якчанд калимаи чинӣ меомӯзем. Масалан: 你好 — Nǐ hǎo — Салом.';
- if(q.includes('тест')||q.includes('санҷ')||q.includes('quiz'))return 'Барои санҷидани дониш тугмаи «Санҷиши дониш · 5 савол»-ро пахш кун.';
- if(q.includes('пешрафт')||q.includes('балл'))return 'Пешрафти дарсҳо дар қисми «Пешрафт» нигоҳ дошта мешавад. Натиҷаи тест низ дар ҳамин телефон сабт мешавад.';
- const hit=all.find(w=>q.includes(w.han.toLowerCase())||q.includes(w.pin.toLowerCase())||q.includes(w.tg.toLowerCase()));
- if(hit)return hit.han+' — '+hit.pin+' — '+hit.tg+'. Ин калима дар дарси «'+lessons[hit.li][0]+'» аст. Барои шунидани талаффуз ба қисми Луғат гузар.';
- if(q.includes('чӣ тавр')||q.includes('чи тавр'))return 'Қадам ба қадам омӯз: аввал калимаро бин, баъд талаффузро гӯш кун ва дар охир тест супор. Агар савол дар бораи калима бошад, худи калимаи чиниро ё Pinyin-ро навис.';
- return 'Ман ҳоло дар реҷаи офлайн кор мекунам ва ба маводи дохили барнома такя мекунам. Саволро бо калимаи чинӣ, Pinyin ё маънои тоҷикиаш мушаххастар навис. Барои ҷавобҳои озоди васеътар модели забонии маҳаллӣ бояд илова шавад.';
+function buildLevels(){
+ const base=[];for(let n=1;n<=6;n++)base.push(words.filter(w=>w.sourceLevel===n));
+ const advanced=words.filter(w=>w.sourceLevel>=7);
+ const cut1=Math.ceil(advanced.length/3),cut2=Math.ceil(advanced.length*2/3);
+ base.push(advanced.slice(0,cut1),advanced.slice(cut1,cut2),advanced.slice(cut2));
+ levels=base.map((arr,i)=>({name:LEVEL_NAMES[i],note:LEVEL_NOTES[i],words:arr,lessons:[]}));
+ lessons=[];
+ levels.forEach((lv,li)=>{
+  for(let start=0;start<lv.words.length;start+=15){
+   const chunk=lv.words.slice(start,start+15),si=lv.lessons.length;
+   const lesson={id:lessonId(li,si),levelIndex:li,index:si,number:si+1,words:chunk,globalIndex:lessons.length};
+   lv.lessons.push(lesson);lessons.push(lesson);
+  }
+ });
 }
-window.askTeacher=function(){
- const el=$('aiQuestion'),raw=(el.value||'').trim();if(!raw)return;
- const chat=$('teacherChat');if(!chat)return;
- const u=document.createElement('div');u.className='chat-line chat-user';u.textContent=raw;chat.appendChild(u);
- const b=document.createElement('div');b.className='chat-line chat-bot';b.textContent=chatReply(raw);chat.appendChild(b);
- el.value='';chat.scrollTop=chat.scrollHeight;
-};
-function startQuiz(){qi=0;score=0;answered=false;$('quizFeedback').textContent='';$('nextQuestion').classList.add('hide');showQuestion();}
-function showQuestion(){
- answered=false;const item=teacherQuestions[qi];$('quizStatus').textContent='Саволи '+(qi+1)+' аз '+teacherQuestions.length+' · Хол: '+score;
- $('quizQuestion').innerHTML='<h3>'+item.q+'</h3>'+item.a.map((a,i)=>'<button class="quiz-option" data-answer="'+i+'">'+a+'</button>').join('');
- $('quizQuestion').querySelectorAll('button').forEach(btn=>btn.onclick=()=>answer(Number(btn.dataset.answer)));
+function go(page){
+ ['home','levels','lessons','detail','dictionary','progress'].forEach(id=>$(id).classList.toggle('hide',id!==page));
+ document.querySelectorAll('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ if(page==='home')renderHome();if(page==='levels')renderLevels();if(page==='dictionary')renderDictionary();if(page==='progress')renderProgress();
 }
-function answer(n){if(answered)return;answered=true;const item=teacherQuestions[qi];if(n===item.c)score++;
- $('quizQuestion').querySelectorAll('button').forEach((btn,i)=>{btn.disabled=true;if(i===item.c)btn.classList.add('correct');else if(i===n)btn.classList.add('wrong')});
- $('quizFeedback').textContent=item.why;$('quizStatus').textContent='Саволи '+(qi+1)+' аз '+teacherQuestions.length+' · Хол: '+score;
- $('nextQuestion').classList.remove('hide');$('nextQuestion').textContent=qi===teacherQuestions.length-1?'Натиҷаро бин':'Саволи навбатӣ →';
+function renderHome(){
+ const read=readIds.size,done=completed.size,total=words.length||11000,pct=total?Math.round(read/total*100):0;
+ $('overallPct').textContent=pct+'%';$('overallBar').style.width=pct+'%';$('readCount').textContent=read.toLocaleString();$('lessonCount').textContent=done.toLocaleString();$('dictionaryCount').textContent=read.toLocaleString();
 }
-function nextQuestion(){if(qi<teacherQuestions.length-1){qi++;$('quizFeedback').textContent='';showQuestion();}else{
- const result={score,total:teacherQuestions.length,date:new Date().toISOString()};localStorage.setItem('shChineseLastQuiz',JSON.stringify(result));
- $('quizQuestion').innerHTML='<h3>Натиҷаи тест: '+score+' аз '+teacherQuestions.length+'</h3><p>'+(score===5?'Офарин! Ҳама ҷавобҳо дурустанд.':score>=3?'Натиҷаи хуб. Калимаҳои хато кардаатро такрор кун.':'Боз дарсҳоро омӯз ва такрор кун.')+'</p>';
- $('quizStatus').textContent='Санҷиш анҷом ёфт';$('quizFeedback').textContent='Натиҷа дар телефон сабт шуд.';$('nextQuestion').classList.add('hide');
-}}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addTools);else addTools();
+function renderLevels(){
+ if(!levels.length)return;
+ $('levelList').innerHTML=levels.map((lv,i)=>{
+  const read=lv.words.filter(w=>readIds.has(keyOf(w))).length,done=lv.lessons.filter(x=>completed.has(x.id)).length;
+  const unlocked=i===0||levels[i-1].lessons.every(x=>completed.has(x.id));
+  return '<button class="card lesson-row '+(unlocked?'':'locked')+'" style="width:100%;text-align:left;color:inherit" data-level="'+i+'" '+(unlocked?'':'disabled')+'><div class="meta"><div class="eyebrow">'+esc(lv.name)+'</div><b>'+esc(lv.note)+'</b><div class="small">'+lv.words.length.toLocaleString()+' калима · '+lv.lessons.length+' дарс · '+read+' хонда шуд</div><div class="progress"><span style="width:'+(lv.words.length?read/lv.words.length*100:0)+'%"></span></div></div><span class="pill">'+done+'/'+lv.lessons.length+'</span></button>';
+ }).join('');
+}
+function openLevel(i){
+ currentLevel=i;const lv=levels[i];$('lessonsTitle').textContent=lv.name+' · Дарсҳо';$('lessonsSubtitle').textContent=lv.words.length+' калима · '+lv.lessons.length+' дарс · ҳар дарс то 15 калима';
+ $('lessonList').innerHTML=lv.lessons.map((l,si)=>{
+  const done=isComplete(i,si),unlocked=l.globalIndex===0||allPreviousDone(l.globalIndex),read=l.words.filter(w=>readIds.has(keyOf(w))).length;
+  return '<button class="card lesson-row '+(unlocked?'':'locked')+'" style="width:100%;text-align:left;color:inherit" data-lesson="'+si+'" '+(unlocked?'':'disabled')+'><div class="meta"><div class="eyebrow">ДАРСИ '+String(si+1).padStart(2,'0')+'</div><b>'+esc(l.words[0]?.han||'Дарс')+' — '+esc(l.words[0]?.pin||'')+'</b><div class="small">'+l.words.length+' калима · '+read+'/'+l.words.length+' хонда шуд</div></div><span class="pill">'+(done?'Анҷом ёфт':unlocked?'Кушода':'Қулф')+'</span></button>';
+ }).join('');
+ go('lessons');
+}
+function openLesson(si){
+ currentLesson=si;const l=levels[currentLevel].lessons[si],done=isComplete(currentLevel,si);
+ $('lessonDetail').innerHTML='<div class="card"><div class="eyebrow">'+esc(levels[currentLevel].name)+' · ДАРСИ '+(si+1)+'</div><h2>15 калимаи ин дарс</h2><p class="muted">Ҳар калимаро бинед, талаффузро гӯш кунед ва баъд «Хондам»-ро пахш кунед.</p><div class="row"><span class="muted">Хондашуда</span><b id="lessonReadCount">0/'+l.words.length+'</b></div><div class="progress"><span id="lessonReadBar"></span></div>'+l.words.map((w,wi)=>wordCard(w,wi)).join('')+'<div class="card" style="margin-top:15px"><p id="finishHint" class="small">Барои анҷом додани дарс ҳамаи калимаҳоро хонед.</p><button class="primary" id="finishLesson" '+(done?'':'disabled')+'>'+(done?'Дарс анҷом ёфтааст ✓':'Дарсро анҷом додан →')+'</button></div></div>';
+ updateLessonMeter();go('detail');
+}
+function wordCard(w,wi){
+ const read=readIds.has(keyOf(w));
+ const example=w.example?'<div class="example"><b>'+esc(w.example)+'</b>'+(w.examplePin?'<div>'+esc(w.examplePin)+'</div>':'')+(w.exampleTg?'<div class="muted">'+esc(w.exampleTg)+'</div>':'')+(w.exampleRu?'<div class="muted">'+esc(w.exampleRu)+'</div>':'')+'</div>':'';
+ const warning=w.translationStatus&&w.translationStatus.includes('UNREVIEWED')?'<div class="small" style="color:var(--gold)">Тарҷумаи автоматӣ · ниёз ба санҷиш</div>':'';
+ return '<div class="word"><div class="row"><div><div class="han">'+esc(w.han)+'</div><div class="pinyin">'+esc(w.pin)+'</div></div><span class="pill">'+(read?'Хонда шуд':'Нав')+'</span></div><div class="translation">'+esc(w.tg)+'<br><span class="muted">'+esc(w.ru)+'</span></div>'+warning+example+'<div class="word-actions"><button class="secondary" data-speak="'+wi+'">🔊 Гӯш кардан</button><button class="'+(read?'secondary':'primary')+'" data-read="'+wi+'">'+(read?'✓ Хонда шуд':'Ман хондам')+'</button></div></div>';
+}
+function updateLessonMeter(){
+ const l=levels[currentLevel].lessons[currentLesson],n=l.words.filter(w=>readIds.has(keyOf(w))).length;
+ if($('lessonReadCount'))$('lessonReadCount').textContent=n+'/'+l.words.length;
+ if($('lessonReadBar'))$('lessonReadBar').style.width=(n/l.words.length*100)+'%';
+ const btn=$('finishLesson');if(btn){btn.disabled=n!==l.words.length&&!isComplete(currentLevel,currentLesson);if(n===l.words.length&&!isComplete(currentLevel,currentLesson))$('finishHint').textContent='Ҳама калимаҳо хонда шуданд. Акнун дарсро анҷом диҳед.';}
+}
+function markRead(wi){
+ const w=levels[currentLevel].lessons[currentLesson].words[wi];readIds.add(keyOf(w));save();
+ const y=window.scrollY;openLesson(currentLesson);window.scrollTo(0,y);renderHome();
+}
+function finishLesson(){
+ const l=levels[currentLevel].lessons[currentLesson];if(!l.words.every(w=>readIds.has(keyOf(w))))return;
+ completed.add(l.id);save();renderHome();openLevel(currentLevel);
+}
+function renderDictionary(){
+ const q=($('dictSearch').value||'').trim().toLowerCase();
+ const mine=words.filter(w=>readIds.has(keyOf(w))).filter(w=>(w.han+' '+w.pin+' '+w.tg+' '+w.ru).toLowerCase().includes(q));
+ $('dictionaryList').innerHTML=mine.length?mine.map(w=>'<div class="card"><div class="han">'+esc(w.han)+'</div><div class="pinyin">'+esc(w.pin)+'</div><div>'+esc(w.tg)+'</div><div class="muted">'+esc(w.ru)+'</div>'+(w.example?'<div class="example">'+esc(w.example)+'<br>'+esc(w.examplePin)+'<br>'+esc(w.exampleTg)+'</div>':'')+'</div>').join(''):'<p class="muted">Дар луғати шумо ҳоло калима нест. Аввал дарсро омӯзед.</p>';
+}
+function renderProgress(){
+ const read=readIds.size,total=words.length,pct=total?Math.round(read/total*100):0;
+ $('progressSummary').textContent=read.toLocaleString()+' аз '+total.toLocaleString()+' калима';
+ $('progressBar').style.width=pct+'%';$('progressText').textContent=completed.size+' дарс анҷом ёфт · '+pct+'% аз рӯйхати умумӣ';
+ $('levelProgress').innerHTML=levels.map(lv=>{const n=lv.words.filter(w=>readIds.has(keyOf(w))).length;return '<div class="card"><div class="row"><b>'+esc(lv.name)+'</b><span class="muted">'+n+'/'+lv.words.length+'</span></div><div class="progress"><span style="width:'+(lv.words.length?n/lv.words.length*100:0)+'%"></span></div></div>';}).join('');
+}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('[data-action],[data-page],[data-level],[data-lesson],[data-speak],[data-read],#finishLesson');
+ if(!t)return;
+ if(t.dataset.page){go(t.dataset.page);return;}
+ if(t.dataset.action==='levels'){go('levels');return;}
+ if(t.dataset.action==='backLessons'){openLevel(currentLevel);return;}
+ if(t.dataset.level!==undefined){openLevel(Number(t.dataset.level));return;}
+ if(t.dataset.lesson!==undefined){openLesson(Number(t.dataset.lesson));return;}
+ if(t.dataset.speak!==undefined){const w=levels[currentLevel].lessons[currentLesson].words[Number(t.dataset.speak)];speak(w.han);return;}
+ if(t.dataset.read!==undefined){markRead(Number(t.dataset.read));return;}
+ if(t.id==='finishLesson'){finishLesson();return;}
+});
+$('dictSearch').addEventListener('input',renderDictionary);
+loadData();
 })();
 </script>
 </body></html>
