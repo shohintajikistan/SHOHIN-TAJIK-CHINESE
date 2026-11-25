@@ -50,11 +50,35 @@ function lessonId(li,si){return li+':'+si;}
 function isComplete(li,si){return completed.has(lessonId(li,si));}
 function allPreviousDone(globalIndex){return globalIndex===0||completed.has(lessons[globalIndex-1].id);}
 function speak(text){if(!('speechSynthesis'in window)){alert('Ин браузер талаффузи овозиро дастгирӣ намекунад.');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='zh-CN';u.rate=.82;speechSynthesis.speak(u);}
+// Версияи кэшро баъди тағйир додани файлҳои луғат зиёд мекунем.
+const DATA_CACHE_NAME='shohin-hsk-data-v1';
+const DATA_FILES=['app/src/main/assets/hsk_vocabulary.tsv','app/src/main/assets/hsk_wordbook.tsv'];
+async function getLessonFiles(){
+ const urls=DATA_FILES.map(path=>new URL(path,location.href).href);
+ if(!('caches' in window)) {
+  const responses=await Promise.all(urls.map(url=>fetch(url)));
+  if(responses.some(r=>!r.ok))throw new Error('Файлҳои луғат аз GitHub Pages дастрас нестанд.');
+  return Promise.all(responses.map(r=>r.text()));
+ }
+ const cache=await caches.open(DATA_CACHE_NAME);
+ const cached=await Promise.all(urls.map(url=>cache.match(url)));
+ if(cached.every(Boolean)) {
+  $('loadStatus').innerHTML='<div class="eyebrow">ОҒОЗИ ОМӮЗИШ</div><p class="center muted">Дарсҳо аз хотираи телефон кушода мешаванд…</p>';
+  return Promise.all(cached.map(r=>r.text()));
+ }
+ $('loadStatus').innerHTML='<div class="eyebrow">БОРКУНИИ АВВАЛ</div><p class="center muted">Ҳамаи дарсҳо бори аввал ба телефон нигоҳ дошта мешаванд. Лутфан интизор шавед…</p>';
+ const responses=await Promise.all(urls.map(async(url,i)=>{
+  if(cached[i])return cached[i];
+  const response=await fetch(url);
+  if(!response.ok)throw new Error('Файлҳои луғат аз GitHub Pages дастрас нестанд.');
+  await cache.put(url,response.clone());
+  return response;
+ }));
+ return Promise.all(responses.map(r=>r.text()));
+}
 async function loadData(){
  try{
-  const [vRes,wRes]=await Promise.all([fetch('app/src/main/assets/hsk_vocabulary.tsv'),fetch('app/src/main/assets/hsk_wordbook.tsv')]);
-  if(!vRes.ok||!wRes.ok)throw new Error('Файлҳои луғат аз GitHub Pages дастрас нестанд.');
-  const [vText,wText]=await Promise.all([vRes.text(),wRes.text()]);
+  const [vText,wText]=await getLessonFiles();
   const vRows=parseTSV(vText),wRows=parseTSV(wText),wordMap=new Map();
   wRows.slice(1).forEach(r=>{if(r.length>=4){const k=r[0]+'|'+r[1].toLowerCase();wordMap.set(k,{tg:r[2]||'',ru:r[3]||'',example:r[4]||'',examplePin:r[5]||'',exampleTg:r[6]||'',exampleRu:r[7]||'',translationStatus:r[8]||''});}});
   words=vRows.slice(1).map((r,i)=>{
