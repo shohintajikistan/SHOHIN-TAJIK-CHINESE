@@ -23,6 +23,8 @@ public class MainActivity extends Activity {
     TextToSpeech tts;
     boolean ttsReady=false;
     Set<String> completed=new HashSet<>(), favorites=new HashSet<>();
+    // Large vocabulary files are bundled in the APK and parsed only once, on first use.
+    ArrayList<String[]> wordbookCache=null, officialVocabularyCache=null;
     int quizScore=0, quizDone=0;
     final String[][] lessons={
       {"Салом ва шиносоӣ","你好","nǐ hǎo","Салом","谢谢","xièxie","Ташаккур","再见","zàijiàn","То дидор","我","wǒ","Ман","你","nǐ","Ту / Шумо","我是塔吉克斯坦人","wǒ shì Tǎjíkèsītǎn rén","Ман тоҷикистониям"},
@@ -265,6 +267,7 @@ public class MainActivity extends Activity {
       return list;
     }
     ArrayList<String[]> wordbook(){
+      if(wordbookCache!=null)return wordbookCache;
       ArrayList<String[]> out=new ArrayList<>();
       try(BufferedReader br=new BufferedReader(new InputStreamReader(getAssets().open("hsk_wordbook.tsv"),"UTF-8"))){
         String line;boolean first=true;
@@ -273,10 +276,12 @@ public class MainActivity extends Activity {
           String[] p=line.split("\\t",-1);
           if(p.length>=8)out.add(p);
         }
+        wordbookCache=out;
       }catch(Exception e){Toast.makeText(this,"Луғат бор нашуд: "+e.getMessage(),Toast.LENGTH_LONG).show();}
       return out;
     }
     ArrayList<String[]> officialVocabulary(){
+      if(officialVocabularyCache!=null)return officialVocabularyCache;
       ArrayList<String[]> out=new ArrayList<>();
       try(BufferedReader br=new BufferedReader(new InputStreamReader(getAssets().open("hsk_vocabulary.tsv"),"UTF-8"))){
         String line;boolean first=true;
@@ -285,6 +290,7 @@ public class MainActivity extends Activity {
           String[] p=line.split("\\t",-1);
           if(p.length>=6)out.add(p);
         }
+        officialVocabularyCache=out;
       }catch(Exception e){Toast.makeText(this,"HSK 3.0: "+e.getMessage(),Toast.LENGTH_LONG).show();}
       return out;
     }
