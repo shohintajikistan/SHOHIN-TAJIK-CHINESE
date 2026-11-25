@@ -77,15 +77,52 @@ async function getLessonFiles(){
  }));
  return Promise.all(responses.map(r=>r.text()));
 }
+function openWordDB(){
+ return new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window)){resolve(null);return;}
+  const request=indexedDB.open('shohin-chinese-library',1);
+  request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains('data'))db.createObjectStore('data');};
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>reject(request.error);
+ });
+}
+async function readWordDB(){
+ const db=await openWordDB();if(!db)return null;
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction('data','readonly'),req=tx.objectStore('data').get('words-v1');
+  req.onsuccess=()=>{db.close();resolve(Array.isArray(req.result)?req.result:null);};
+  req.onerror=()=>{db.close();reject(req.error);};
+ });
+}
+async function writeWordDB(data){
+ const db=await openWordDB();if(!db)return;
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction('data','readwrite');
+  tx.objectStore('data').put(data,'words-v1');
+  tx.oncomplete=()=>{db.close();resolve();};
+  tx.onerror=()=>{db.close();reject(tx.error);};
+ });
+}
+function parseWordFiles(vText,wText){
+ const vRows=parseTSV(vText),wRows=parseTSV(wText),wordMap=new Map();
+ wRows.slice(1).forEach(r=>{if(r.length>=4){const k=r[0]+'|'+r[1].toLowerCase();wordMap.set(k,{tg:r[2]||'',ru:r[3]||'',example:r[4]||'',examplePin:r[5]||'',exampleTg:r[6]||'',exampleRu:r[7]||'',translationStatus:r[8]||''});}});
+ return vRows.slice(1).map((r,i)=>{
+  const sourceLevel=Number(r[0]);const han=r[1]||'',pin=r[2]||'';const extra=wordMap.get(han+'|'+pin.toLowerCase())||{};
+  return {id:sourceLevel+':'+(r[4]||i),sourceLevel,han,pin,pos:r[3]||'',tg:extra.tg||'Тарҷума ҳоло дастрас нест',ru:extra.ru||'Перевод пока отсутствует',example:extra.example||'',examplePin:extra.examplePin||'',exampleTg:extra.exampleTg||'',exampleRu:extra.exampleRu||'',translationStatus:extra.translationStatus||''};
+ });
+}
 async function loadData(){
  try{
-  const [vText,wText]=await getLessonFiles();
-  const vRows=parseTSV(vText),wRows=parseTSV(wText),wordMap=new Map();
-  wRows.slice(1).forEach(r=>{if(r.length>=4){const k=r[0]+'|'+r[1].toLowerCase();wordMap.set(k,{tg:r[2]||'',ru:r[3]||'',example:r[4]||'',examplePin:r[5]||'',exampleTg:r[6]||'',exampleRu:r[7]||'',translationStatus:r[8]||''});}});
-  words=vRows.slice(1).map((r,i)=>{
-   const sourceLevel=Number(r[0]);const han=r[1]||'',pin=r[2]||'';const extra=wordMap.get(han+'|'+pin.toLowerCase())||{};
-   return {id:sourceLevel+':'+(r[4]||i),sourceLevel,han,pin,pos:r[3]||'',tg:extra.tg||'Тарҷума ҳоло дастрас нест',ru:extra.ru||'Перевод пока отсутствует',example:extra.example||'',examplePin:extra.examplePin||'',exampleTg:extra.exampleTg||'',exampleRu:extra.exampleRu||'',translationStatus:extra.translationStatus||''};
-  });
+  let savedWords=null;
+  try{savedWords=await readWordDB();}catch(dbError){console.warn('SHOHIN local database read:',dbError);}
+  if(savedWords&&savedWords.length){
+   words=savedWords;
+   $('loadStatus').innerHTML='<div class="eyebrow">ОФЛАЙН-КИТОБХОНА</div><p class="center muted">Калимаҳо аз хотираи телефон кушода шуданд.</p>';
+  }else{
+   const [vText,wText]=await getLessonFiles();
+   words=parseWordFiles(vText,wText);
+   try{await writeWordDB(words);}catch(dbError){console.warn('SHOHIN local database save:',dbError);}
+  }
   buildLevels();$('loadStatus').classList.add('hide');renderHome();renderLevels();
  }catch(e){$('loadStatus').innerHTML='<div class="eyebrow">ХАТОИ БОРКУНӢ</div><p>'+esc(e.message)+'</p><p class="small">Веб-сайт бояд аз GitHub Pages кушода шавад. Агар ин паём боқӣ монад, саҳифаро нав кунед.</p>';}
 }
