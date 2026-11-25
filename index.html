@@ -87,7 +87,7 @@ input{width:100%;padding:13px;border-radius:12px;background:#071c16;border:1px s
  <div class="hero"><div class="eyebrow">HSK 3.0 · ЗАБОНИ ЧИНӢ</div><h1>Омӯзиши чинӣ<br>дарс ба дарс</h1><p class="muted">Ҳар дарс 15 калима дорад. Калимаҳоро гӯш кунед, хонед ва пас аз анҷом ба дарси навбатӣ гузаред.</p><div class="row"><span class="muted">Пешрафти умумӣ</span><b id="overallPct">0%</b></div><div class="progress"><span id="overallBar"></span></div><button class="primary" data-action="levels">Оғози омӯзиш →</button></div>
  <div class="grid"><div class="tile"><b id="readCount">0</b><span class="muted">Калимаҳои хондашуда</span></div><div class="tile"><b id="lessonCount">0</b><span class="muted">Дарсҳои анҷомшуда</span></div><div class="tile"><b id="dictionaryCount">0</b><span class="muted">Калимаҳо дар луғат</span></div></div>
  <div class="card"><div class="eyebrow">ҚОИДАИ ОМӮЗИШ</div><p>Барои кушодани дарси навбатӣ ҳамаи 15 калимаи дарси ҷориро хонед ва ҳамчун «Хондам» қайд кунед. Ҳар калимаи хондашуда фавран ба луғати шахсӣ дохил мешавад.</p></div>
- <div id="loadStatus" class="card"><div class="spinner"></div><p class="center muted">Рӯйхати 11 000 калима бор шуда истодааст…</p></div>
+ <div id="loadStatus" class="card"><div class="spinner"></div><p class="center muted">Танҳо маълумоти сатҳҳо омода шуда истодааст…</p></div>
 </section>
 <section id="levels" class="hide"><div class="row"><h2>Сатҳҳои омӯзиш</h2><span class="pill" id="levelsTotal">9 сатҳ</span></div><p class="muted">Аз HSK 1 сар кунед. Сатҳҳои навбатӣ баъди анҷоми дарсҳои қаблӣ кушода мешаванд.</p><div id="levelList"></div><div class="notice">Эзоҳ: рӯйхати интихобшудаи HSK 3.0 барои сатҳҳои 7–9 як гурӯҳи умумии пешрафта дорад. SHOHIN онро ба се қисми омӯзишӣ ҷудо мекунад; ин тақсимоти дохилии барнома аст, на рӯйхати расмии алоҳидаи HSK 7, 8 ва 9.</div></section>
 <section id="lessons" class="hide"><button class="secondary" data-action="levels">← Сатҳҳо</button><h2 id="lessonsTitle">Дарсҳо</h2><p class="muted" id="lessonsSubtitle"></p><div id="lessonList"></div></section>
@@ -114,32 +114,13 @@ function lessonId(li,si){return li+':'+si;}
 function isComplete(li,si){return completed.has(lessonId(li,si));}
 function allPreviousDone(globalIndex){return globalIndex===0||completed.has(lessons[globalIndex-1].id);}
 function speak(text){if(!('speechSynthesis'in window)){alert('Ин браузер талаффузи овозиро дастгирӣ намекунад.');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='zh-CN';u.rate=.82;speechSynthesis.speak(u);}
-// Версияи кэшро баъди тағйир додани файлҳои луғат зиёд мекунем.
-const DATA_CACHE_NAME='shohin-hsk-data-v2';
-const DATA_FILES=['app/src/main/assets/hsk_vocabulary.tsv','app/src/main/assets/hsk_wordbook.tsv'];
-async function getLessonFiles(){
- const urls=DATA_FILES.map(path=>new URL(path,location.href).href);
- if(!('caches' in window)) {
-  const responses=await Promise.all(urls.map(url=>fetch(url)));
-  if(responses.some(r=>!r.ok))throw new Error('Файлҳои луғат аз GitHub Pages дастрас нестанд.');
-  return Promise.all(responses.map(r=>r.text()));
- }
- const cache=await caches.open(DATA_CACHE_NAME);
- const cached=await Promise.all(urls.map(url=>cache.match(url)));
- if(cached.every(Boolean)) {
-  $('loadStatus').innerHTML='<div class="eyebrow">ОҒОЗИ ОМӮЗИШ</div><p class="center muted">Дарсҳо аз хотираи телефон кушода мешаванд…</p>';
-  return Promise.all(cached.map(r=>r.text()));
- }
- $('loadStatus').innerHTML='<div class="eyebrow">БОРКУНИИ АВВАЛ</div><p class="center muted">Ҳамаи дарсҳо бори аввал ба телефон нигоҳ дошта мешаванд. Лутфан интизор шавед…</p>';
- const responses=await Promise.all(urls.map(async(url,i)=>{
-  if(cached[i])return cached[i];
-  const response=await fetch(url);
-  if(!response.ok)throw new Error('Файлҳои луғат аз GitHub Pages дастрас нестанд.');
-  await cache.put(url,response.clone());
-  return response;
- }));
- return Promise.all(responses.map(r=>r.text()));
-}
+// Маълумоти умумӣ хурд аст; калимаҳо танҳо ҳангоми интихоби сатҳ бор мешаванд.
+const MANIFEST_CACHE='shohin-hsk-manifest-v1';
+const MANIFEST_PATH='data/levels.json';
+let levelManifest=null;
+let totalWordCount=11000;
+let downloadedLevels=new Set(readSavedSet('shChineseDownloadedLevels').map(String));
+
 function openWordDB(){
  return new Promise((resolve,reject)=>{
   if(!('indexedDB' in window)){resolve(null);return;}
@@ -149,60 +130,112 @@ function openWordDB(){
   request.onerror=()=>reject(request.error);
  });
 }
-async function readWordDB(){
+async function readLevelDB(i){
  const db=await openWordDB();if(!db)return null;
  return new Promise((resolve,reject)=>{
-  const tx=db.transaction('data','readonly'),req=tx.objectStore('data').get('words-v1');
-  req.onsuccess=()=>{db.close();resolve(Array.isArray(req.result)?req.result:null);};
+  const tx=db.transaction('data','readonly'),req=tx.objectStore('data').get('level-'+i+'-v2');
+  req.onsuccess=()=>{db.close();resolve(req.result&&Array.isArray(req.result.words)?req.result:null);};
   req.onerror=()=>{db.close();reject(req.error);};
  });
 }
-async function writeWordDB(data){
- const db=await openWordDB();if(!db)return;
+async function writeLevelDB(i,data){
+ const db=await openWordDB();if(!db)throw new Error('Хотираи офлайнии телефон дастгирӣ намешавад.');
  return new Promise((resolve,reject)=>{
   const tx=db.transaction('data','readwrite');
-  tx.objectStore('data').put(data,'words-v1');
+  tx.objectStore('data').put(data,'level-'+i+'-v2');
   tx.oncomplete=()=>{db.close();resolve();};
   tx.onerror=()=>{db.close();reject(tx.error);};
  });
 }
-function parseWordFiles(vText,wText){
- const vRows=parseTSV(vText),wRows=parseTSV(wText),wordMap=new Map();
- wRows.slice(1).forEach(r=>{if(r.length>=4){const k=r[0]+'|'+r[1].toLowerCase();wordMap.set(k,{tg:r[2]||'',ru:r[3]||'',example:r[4]||'',examplePin:r[5]||'',exampleTg:r[6]||'',exampleRu:r[7]||'',translationStatus:r[8]||''});}});
- return vRows.slice(1).map((r,i)=>{
-  const sourceLevel=Number(r[0]);const han=r[1]||'',pin=r[2]||'';const extra=wordMap.get(han+'|'+pin.toLowerCase())||{};
-  return {id:sourceLevel+':'+(r[4]||i),sourceLevel,han,pin,pos:r[3]||'',tg:extra.tg||'Тарҷума ҳоло дастрас нест',ru:extra.ru||'Перевод пока отсутствует',example:extra.example||'',examplePin:extra.examplePin||'',exampleTg:extra.exampleTg||'',exampleRu:extra.exampleRu||'',translationStatus:extra.translationStatus||''};
- });
+async function fetchManifest(){
+ const url=new URL(MANIFEST_PATH,location.href).href;
+ if('caches'in window){
+  const cache=await caches.open(MANIFEST_CACHE),saved=await cache.match(url);
+  if(saved)return saved.json();
+  const response=await fetch(url);
+  if(!response.ok)throw new Error('Файли маълумоти сатҳҳо дастрас нест.');
+  await cache.put(url,response.clone());
+  return response.json();
+ }
+ const response=await fetch(url);
+ if(!response.ok)throw new Error('Файли маълумоти сатҳҳо дастрас нест.');
+ return response.json();
+}
+function rebuildLoadedCollections(){
+ words=levels.flatMap(lv=>lv.words);
+ lessons=levels.flatMap(lv=>lv.lessons);
+}
+function buildLevelLessons(i){
+ const lv=levels[i];lv.lessons=[];
+ let offset=0;
+ for(let n=0;n<i;n++)offset+=levelManifest.levels[n].lessonCount;
+ for(let start=0;start<lv.words.length;start+=15){
+  const chunk=lv.words.slice(start,start+15),si=lv.lessons.length;
+  lv.lessons.push({id:lessonId(i,si),levelIndex:i,index:si,number:si+1,words:chunk,globalIndex:offset+si});
+ }
+}
+function allLevelComplete(i){
+ if(i<0)return true;
+ const count=levelManifest?.levels?.[i]?.lessonCount||0;
+ if(!count)return false;
+ for(let n=0;n<count;n++)if(!completed.has(lessonId(i,n)))return false;
+ return true;
+}
+function isLessonUnlocked(i,si){
+ if(i===0&&si===0)return true;
+ if(si>0)return completed.has(lessonId(i,si-1));
+ return allLevelComplete(i-1);
+}
+async function loadLevel(i){
+ const lv=levels[i];if(!lv)throw new Error('Сатҳ ёфт нашуд.');
+ if(lv.words.length)return lv;
+ let data=null;
+ try{data=await readLevelDB(i);}catch(error){console.warn('Offline level read:',error);}
+ if(!data){
+  const file=levelManifest.levels[i].file;
+  const url=new URL('data/'+file,location.href).href;
+  const response=await fetch(url);
+  if(!response.ok)throw new Error('Файли '+lv.name+' бор карда нашуд. Интернетро санҷед.');
+  data=await response.json();
+  if(!data||!Array.isArray(data.words))throw new Error('Маълумоти сатҳ нодуруст аст.');
+  await writeLevelDB(i,data);
+ }
+ lv.words=data.words;
+ buildLevelLessons(i);
+ downloadedLevels.add(String(i));
+ localStorage.setItem('shChineseDownloadedLevels',JSON.stringify([...downloadedLevels]));
+ rebuildLoadedCollections();
+ return lv;
 }
 async function loadData(){
  try{
-  let savedWords=null;
-  try{savedWords=await readWordDB();}catch(dbError){console.warn('SHOHIN local database read:',dbError);}
-  if(savedWords&&savedWords.length){
-   words=savedWords;
-   $('loadStatus').innerHTML='<div class="eyebrow">ОФЛАЙН-КИТОБХОНА</div><p class="center muted">Калимаҳо аз хотираи телефон кушода шуданд.</p>';
-  }else{
-   const [vText,wText]=await getLessonFiles();
-   words=parseWordFiles(vText,wText);
-   try{await writeWordDB(words);}catch(dbError){console.warn('SHOHIN local database save:',dbError);}
+  levelManifest=await fetchManifest();
+  totalWordCount=levelManifest.totalWords||11000;
+  levels=levelManifest.levels.map((meta,i)=>({
+   name:LEVEL_NAMES[i]||meta.name,
+   note:LEVEL_NOTES[i]||'',
+   words:[],
+   lessons:[],
+   wordCount:meta.wordCount||0,
+   lessonCount:meta.lessonCount||0
+  }));
+  // Танҳо сатҳҳое, ки қаблан алоҳида зеркашӣ шудаанд, аз хотираи телефон барқарор мешаванд.
+  for(const value of [...downloadedLevels]){
+   const i=Number(value);
+   if(!Number.isInteger(i)||i<0||i>=levels.length){downloadedLevels.delete(value);continue;}
+   try{
+    const data=await readLevelDB(i);
+    if(data){levels[i].words=data.words;buildLevelLessons(i);}
+    else downloadedLevels.delete(value);
+   }catch(error){console.warn('Saved level restore:',error);downloadedLevels.delete(value);}
   }
-  buildLevels();$('loadStatus').classList.add('hide');renderHome();renderLevels();
- }catch(e){$('loadStatus').innerHTML='<div class="eyebrow">ХАТОИ БОРКУНӢ</div><p>'+esc(e.message)+'</p><p class="small">Веб-сайт бояд аз GitHub Pages кушода шавад. Агар ин паём боқӣ монад, саҳифаро нав кунед.</p>';}
-}
-function buildLevels(){
- const base=[];for(let n=1;n<=6;n++)base.push(words.filter(w=>w.sourceLevel===n));
- const advanced=words.filter(w=>w.sourceLevel>=7);
- const cut1=Math.ceil(advanced.length/3),cut2=Math.ceil(advanced.length*2/3);
- base.push(advanced.slice(0,cut1),advanced.slice(cut1,cut2),advanced.slice(cut2));
- levels=base.map((arr,i)=>({name:LEVEL_NAMES[i],note:LEVEL_NOTES[i],words:arr,lessons:[]}));
- lessons=[];
- levels.forEach((lv,li)=>{
-  for(let start=0;start<lv.words.length;start+=15){
-   const chunk=lv.words.slice(start,start+15),si=lv.lessons.length;
-   const lesson={id:lessonId(li,si),levelIndex:li,index:si,number:si+1,words:chunk,globalIndex:lessons.length};
-   lv.lessons.push(lesson);lessons.push(lesson);
-  }
- });
+  localStorage.setItem('shChineseDownloadedLevels',JSON.stringify([...downloadedLevels]));
+  rebuildLoadedCollections();
+  $('loadStatus').innerHTML='<div class="eyebrow">КИТОБХОНАИ SHOHIN</div><p class="center muted">Сатҳи дилхоҳро интихоб кунед ва танҳо ҳамон сатҳро зеркашӣ намоед. Сатҳҳои зеркашидашуда баъд аз ин бе интернет кушода мешаванд.</p>';
+  renderHome();renderLevels();
+ }catch(e){
+  $('loadStatus').innerHTML='<div class="eyebrow">ХАТОИ ОҒОЗ</div><p>'+esc(e.message)+'</p><p class="small">Интернетро пайваст кунед ва саҳифаро нав кунед.</p>';
+ }
 }
 function go(page){
  const allowed=['home','levels','lessons','detail','dictionary','conversations','progress'];
@@ -229,37 +262,39 @@ if(bottomNav){
  },true);
 }
 function renderHome(){
- const read=readIds.size,done=completed.size,total=words.length||11000,pct=total?Math.round(read/total*100):0;
+ const read=readIds.size,done=completed.size,total=totalWordCount||11000,pct=total?Math.round(read/total*100):0;
  $('overallPct').textContent=pct+'%';$('overallBar').style.width=pct+'%';$('readCount').textContent=read.toLocaleString();$('lessonCount').textContent=done.toLocaleString();$('dictionaryCount').textContent=read.toLocaleString();
 }
-async function saveLevelOffline(i){
- const lv=levels[i];
- if(!lv||!lv.words.length)return;
- const db=await openWordDB();
- if(!db)throw new Error('Хотираи офлайнии телефон дастгирӣ намешавад.');
- await new Promise((resolve,reject)=>{
-  const tx=db.transaction('data','readwrite');
-  tx.objectStore('data').put(lv.words,'level-'+i+'-v1');
-  tx.oncomplete=()=>{db.close();resolve();};
-  tx.onerror=()=>{db.close();reject(tx.error);};
- });
- downloadedLevels.add(String(i));
- localStorage.setItem('shChineseDownloadedLevels',JSON.stringify([...downloadedLevels]));
- renderLevels();
+async function downloadLevel(i,button){
+ if(button){button.disabled=true;button.textContent='Зеркашӣ шуда истодааст…';}
+ try{
+  await loadLevel(i);
+  renderLevels();renderHome();
+ }catch(error){
+  if(button){button.disabled=false;button.textContent='↓ Зеркашӣ кардани HSK '+(i+1);}
+  alert('Хатои зеркашӣ: '+error.message);
+ }
 }
 function renderLevels(){
  if(!levels.length)return;
  $('levelList').innerHTML=levels.map((lv,i)=>{
-  const read=lv.words.filter(w=>readIds.has(keyOf(w))).length,done=lv.lessons.filter(x=>completed.has(x.id)).length;
-  const unlocked=i===0||levels[i-1].lessons.every(x=>completed.has(x.id));
-  const saved=downloadedLevels.has(String(i));
-  return '<div class="card level-card"><div class="lesson-row"><div class="meta"><div class="eyebrow">'+esc(lv.name)+'</div><b>'+esc(lv.note)+'</b><div class="small">'+lv.words.length.toLocaleString()+' калима · '+lv.lessons.length+' дарс · '+read+' хонда шуд</div><div class="progress"><span style="width:'+(lv.words.length?read/lv.words.length*100:0)+'%"></span></div></div><span class="pill">'+done+'/'+lv.lessons.length+'</span></div><div class="level-actions"><button class="secondary" data-level="'+i+'" '+(unlocked?'':'disabled')+'>'+(unlocked?'Кушодани дарсҳо':'Қулф аст')+'</button><button class="primary" data-level-download="'+i+'">'+(saved?'✓ Дар телефон нигоҳ дошта шуд':'↓ Ба телефон зеркашӣ кардан')+'</button></div></div>';
+  const meta=levelManifest.levels[i];
+  const saved=downloadedLevels.has(String(i))&&lv.words.length>0;
+  const read=saved?lv.words.filter(w=>readIds.has(keyOf(w))).length:0;
+  const done=completed.size?Array.from({length:meta.lessonCount},(_,n)=>completed.has(lessonId(i,n))).filter(Boolean).length:0;
+  const unlocked=i===0||allLevelComplete(i-1);
+  return '<div class="card level-card"><div class="lesson-row"><div class="meta"><div class="eyebrow">'+esc(lv.name)+'</div><b>'+esc(lv.note)+'</b><div class="small">'+meta.wordCount.toLocaleString()+' калима · '+meta.lessonCount+' дарс · '+(saved?read+' хонда шуд':'Ҳоло зеркашӣ нашудааст')+'</div><div class="progress"><span style="width:'+(saved&&meta.wordCount?read/meta.wordCount*100:0)+'%"></span></div></div><span class="pill">'+done+'/'+meta.lessonCount+'</span></div><div class="level-actions"><button class="secondary" data-level="'+i+'" '+(saved&&unlocked?'':'disabled')+'>'+(saved?(unlocked?'Кушодани дарсҳо':'Пас аз сатҳи қаблӣ кушода мешавад'):'Аввал сатҳро зеркашӣ кунед')+'</button><button class="primary" data-level-download="'+i+'" '+(saved?'disabled':'')+'>'+(saved?'✓ Дар телефон нигоҳ дошта шуд':'↓ Скачать HSK '+(i+1))+'</button></div></div>';
  }).join('');
 }
 function openLevel(i){
- currentLevel=i;const lv=levels[i];$('lessonsTitle').textContent=lv.name+' · Дарсҳо';$('lessonsSubtitle').textContent=lv.words.length+' калима · '+lv.lessons.length+' дарс · ҳар дарс то 15 калима';
+ const lv=levels[i];
+ if(!lv||!lv.words.length){alert('Аввал ин сатҳро зеркашӣ кунед.');return;}
+ if(i>0&&!allLevelComplete(i-1)){alert('Аввал ҳамаи дарсҳои сатҳи қаблиро анҷом диҳед.');return;}
+ currentLevel=i;
+ $('lessonsTitle').textContent=lv.name+' · Дарсҳо';
+ $('lessonsSubtitle').textContent=lv.words.length+' калима · '+lv.lessons.length+' дарс · ҳар дарс то 15 калима';
  $('lessonList').innerHTML=lv.lessons.map((l,si)=>{
-  const done=isComplete(i,si),unlocked=l.globalIndex===0||allPreviousDone(l.globalIndex),read=l.words.filter(w=>readIds.has(keyOf(w))).length;
+  const done=isComplete(i,si),unlocked=isLessonUnlocked(i,si),read=l.words.filter(w=>readIds.has(keyOf(w))).length;
   return '<button class="card lesson-row '+(unlocked?'':'locked')+'" style="width:100%;text-align:left;color:inherit" data-lesson="'+si+'" '+(unlocked?'':'disabled')+'><div class="meta"><div class="eyebrow">ДАРСИ '+String(si+1).padStart(2,'0')+'</div><b>'+esc(l.words[0]?.han||'Дарс')+' — '+esc(l.words[0]?.pin||'')+'</b><div class="small">'+l.words.length+' калима · '+read+'/'+l.words.length+' хонда шуд</div></div><span class="pill">'+(done?'Анҷом ёфт':unlocked?'Кушода':'Қулф')+'</span></button>';
  }).join('');
  go('lessons');
@@ -410,10 +445,15 @@ conversationTopics.push(...moreTopics);
 const extendedTopics=[["Дар бозор","Харид, нарх ва интихоби маҳсулот",["请问，这个多少钱？|Qǐngwèn, zhège duōshao qián?|Скажите, сколько это стоит?|Лутфан, ин чанд пул аст?","我想买新鲜的水果。|Wǒ xiǎng mǎi xīnxiān de shuǐguǒ.|Я хочу купить свежие фрукты.|Ман меваи тару тоза харидан мехоҳам.","可以便宜一点吗？|Kěyǐ piányi yìdiǎn ma?|Можно немного дешевле?|Каме арзонтар мешавад?","请给我两公斤。|Qǐng gěi wǒ liǎng gōngjīn.|Дайте мне два килограмма.|Лутфан, ба ман ду кило диҳед.","这些东西一共多少钱？|Zhèxiē dōngxi yígòng duōshao qián?|Сколько всё это стоит вместе?|Ҳамаи ин чизҳо якҷоя чанд пул?","谢谢，我买了。|Xièxie, wǒ mǎi le.|Спасибо, я покупаю.|Раҳмат, мехарам."]],["Ҳуҷҷат ва идора","Ариза, имзо ва гирифтани маълумот",["我想填写这份表格。|Wǒ xiǎng tiánxiě zhè fèn biǎogé.|Я хочу заполнить эту форму.|Ман мехоҳам ин варақаро пур кунам.","这里需要签名吗？|Zhèlǐ xūyào qiānmíng ma?|Здесь нужна подпись?|Дар ин ҷо имзо лозим аст?","我带了护照。|Wǒ dài le hùzhào.|Я принёс паспорт.|Ман шиносномаамро овардам.","还需要什么文件？|Hái xūyào shénme wénjiàn?|Какие ещё документы нужны?|Боз кадом ҳуҷҷатҳо лозиманд?","我应该去哪个窗口？|Wǒ yīnggāi qù nǎ ge chuāngkǒu?|К какому окну мне подойти?|Ман ба кадом тиреза равам?","什么时候可以拿到结果？|Shénme shíhou kěyǐ ná dào jiéguǒ?|Когда можно получить результат?|Натиҷаро кай гирифта метавонам?"]],["Дар ҷои кор","Супоришҳо ва муошират бо ҳамкорон",["今天的任务是什么？|Jīntiān de rènwu shì shénme?|Какое сегодня задание?|Вазифаи имрӯза чист?","我已经完成了。|Wǒ yǐjīng wánchéng le.|Я уже закончил.|Ман аллакай анҷом додам.","这个文件需要修改。|Zhège wénjiàn xūyào xiūgǎi.|Этот документ нужно исправить.|Ин ҳуҷҷатро ислоҳ кардан лозим аст.","我们一起解决这个问题。|Wǒmen yìqǐ jiějué zhège wèntí.|Решим эту проблему вместе.|Биёед ин мушкилро якҷоя ҳал кунем.","请把邮件发给我。|Qǐng bǎ yóujiàn fā gěi wǒ.|Отправьте мне письмо.|Лутфан, ба ман мактуб фиристед.","今天工作很顺利。|Jīntiān gōngzuò hěn shùnlì.|Сегодня работа идёт хорошо.|Имрӯз кор хуб пеш меравад."]],["Дар донишгоҳ","Фанҳо, китобхона ва имтиҳон",["你在哪所大学学习？|Nǐ zài nǎ suǒ dàxué xuéxí?|В каком университете ты учишься?|Шумо дар кадом донишгоҳ таҳсил мекунед?","我学习经济学。|Wǒ xuéxí jīngjìxué.|Я изучаю экономику.|Ман иқтисодро меомӯзам.","图书馆几点关门？|Túshūguǎn jǐ diǎn guānmén?|Во сколько закрывается библиотека?|Китобхона соати чанд баста мешавад?","我想借这本书。|Wǒ xiǎng jiè zhè běn shū.|Я хочу взять эту книгу.|Ман ин китобро гирифтан мехоҳам.","我们一起准备考试吧。|Wǒmen yìqǐ zhǔnbèi kǎoshì ba.|Давай вместе подготовимся к экзамену.|Биёед якҷоя ба имтиҳон тайёр шавем.","我的课程从九点开始。|Wǒ de kèchéng cóng jiǔ diǎn kāishǐ.|Мои занятия начинаются в девять.|Дарсҳои ман аз соати нӯҳ сар мешаванд."]],["Пухтупаз","Маҳсулот ва тайёр кардани хӯрок",["你会做中国菜吗？|Nǐ huì zuò Zhōngguó cài ma?|Ты умеешь готовить китайскую еду?|Шумо таоми чинӣ пухта метавонед?","先把水烧开。|Xiān bǎ shuǐ shāo kāi.|Сначала вскипятите воду.|Аввал обро ҷӯшонед.","请把蔬菜洗干净。|Qǐng bǎ shūcài xǐ gānjìng.|Помойте овощи.|Лутфан, сабзавотро тоза шӯед.","需要多少盐？|Xūyào duōshao yán?|Сколько соли нужно?|Чӣ қадар намак лозим аст?","这个汤闻起来很香。|Zhège tāng wén qǐlái hěn xiāng.|Этот суп вкусно пахнет.|Ин шӯрбо бӯи хуш дорад.","我们一起吃饭吧。|Wǒmen yìqǐ chīfàn ba.|Давай поедим вместе.|Биёед якҷоя хӯрок хӯрем."]],["Қабули духтур","Нишонаҳо ва муоина",["我想挂号。|Wǒ xiǎng guàhào.|Я хочу записаться на приём.|Ман мехоҳам барои қабул номнавис шавам.","您哪里不舒服？|Nín nǎlǐ bù shūfu?|Что вас беспокоит?|Шуморо чӣ нороҳат мекунад?","我从昨天开始咳嗽。|Wǒ cóng zuótiān kāishǐ késou.|Я кашляю со вчерашнего дня.|Ман аз дирӯз сулфа мекунам.","疼了多长时间？|Téng le duō cháng shíjiān?|Как давно болит?|Чанд вақт боз дард мекунад?","我需要做检查吗？|Wǒ xūyào zuò jiǎnchá ma?|Мне нужно пройти обследование?|Оё ман бояд муоина шавам?","谢谢医生，我明白了。|Xièxie yīshēng, wǒ míngbai le.|Спасибо, доктор, я понял.|Ташаккур, духтур, фаҳмидам."]],["Таъмири мошин","Мушкилоти мошин ва хизматрасонӣ",["我的车发动不了。|Wǒ de chē fādòng bù liǎo.|Моя машина не заводится.|Мошини ман ба кор намедарояд.","发动机有奇怪的声音。|Fādòngjī yǒu qíguài de shēngyīn.|Двигатель издаёт странный звук.|Муҳаррик садои аҷиб мебарорад.","请检查一下轮胎。|Qǐng jiǎnchá yíxià lúntāi.|Проверьте шины.|Лутфан, чархҳоро санҷед.","需要换机油吗？|Xūyào huàn jīyóu ma?|Нужно менять масло?|Равғанро иваз кардан лозим аст?","修理要花多少钱？|Xiūlǐ yào huā duōshao qián?|Сколько стоит ремонт?|Таъмир чанд пул мешавад?","今天能修好吗？|Jīntiān néng xiū hǎo ma?|Можно починить сегодня?|Имрӯз таъмир карда метавонед?"]],["Толори варзиш","Машқ ва таҷҳизот",["我想办一张会员卡。|Wǒ xiǎng bàn yì zhāng huìyuánkǎ.|Я хочу оформить абонемент.|Ман мехоҳам корти узвият гирам.","这里有教练吗？|Zhèlǐ yǒu jiàoliàn ma?|Здесь есть тренер?|Дар ин ҷо мураббӣ ҳаст?","这个器械怎么使用？|Zhège qìxiè zěnme shǐyòng?|Как пользоваться этим тренажёром?|Ин дастгоҳро чӣ тавр истифода барам?","请帮我调整重量。|Qǐng bāng wǒ tiáozhěng zhòngliàng.|Помогите настроить вес.|Лутфан, вазнро танзим кунед.","我需要热身。|Wǒ xūyào rèshēn.|Мне нужна разминка.|Ман бояд гармкунии бадан кунам.","我们明天继续吧。|Wǒmen míngtiān jìxù ba.|Продолжим завтра.|Пагоҳ давом медиҳем."]],["Сартарошхона","Интихоби мӯй ва хизматрасонӣ",["我想剪短一点儿。|Wǒ xiǎng jiǎn duǎn yìdiǎnr.|Я хочу подстричь покороче.|Мехоҳам каме кӯтоҳтар кунед.","两边不要剪得太短。|Liǎngbiān bú yào jiǎn de tài duǎn.|По бокам не стригите слишком коротко.|Аз паҳлуҳо хеле кӯтоҳ накунед.","可以给我看一下发型照片吗？|Kěyǐ gěi wǒ kàn yíxià fàxíng zhàopiàn ma?|Можно посмотреть фотографии причёсок?|Метавонед аксҳои мӯйро нишон диҳед?","只修一下头发。|Zhǐ xiū yíxià tóufa.|Только немного подровняйте волосы.|Танҳо мӯйро каме рост кунед.","需要洗头吗？|Xūyào xǐtóu ma?|Нужно помыть голову?|Мӯйро шустан лозим аст?","多少钱？我现在付款。|Duōshao qián? Wǒ xiànzài fùkuǎn.|Сколько стоит? Я сейчас заплачу.|Чанд пул? Ҳозир пардохт мекунам."]],["Филм ва китоб","Фикр баён кардан ва тавсия додан",["你看过这部电影吗？|Nǐ kàn guo zhè bù diànyǐng ma?|Ты смотрел этот фильм?|Шумо ин филмро дидаед?","我觉得故事很有意思。|Wǒ juéde gùshi hěn yǒu yìsi.|Я считаю, что сюжет интересный.|Ба фикрам, ҳикоя ҷолиб аст.","你最喜欢哪个角色？|Nǐ zuì xǐhuan nǎ ge juésè?|Какой персонаж тебе больше нравится?|Кадом қаҳрамон ба шумо бештар писанд аст?","这本书是谁写的？|Zhè běn shū shì shéi xiě de?|Кто написал эту книгу?|Ин китобро кӣ навиштааст?","我还没有看完。|Wǒ hái méiyǒu kàn wán.|Я ещё не дочитал.|Ман ҳанӯз тамом накардаам.","你能推荐一本书吗？|Nǐ néng tuījiàn yì běn shū ma?|Можешь посоветовать книгу?|Метавонед китобе тавсия диҳед?"]],["Тоҷикистон ва Чин","Кишварҳо, шаҳрҳо ва фарҳанг",["你去过塔吉克斯坦吗？|Nǐ qù guo Tǎjíkèsītǎn ma?|Ты бывал в Таджикистане?|Шумо ба Тоҷикистон рафтаед?","塔吉克斯坦的山很美。|Tǎjíkèsītǎn de shān hěn měi.|Горы Таджикистана очень красивые.|Кӯҳҳои Тоҷикистон хеле зебоанд.","中国有很多大城市。|Zhōngguó yǒu hěn duō dà chéngshì.|В Китае много больших городов.|Дар Чин шаҳрҳои калон бисёранд.","我想了解中国文化。|Wǒ xiǎng liǎojiě Zhōngguó wénhuà.|Я хочу узнать китайскую культуру.|Ман мехоҳам фарҳанги Чинро омӯзам.","你会说塔吉克语吗？|Nǐ huì shuō Tǎjíkèyǔ ma?|Ты говоришь по-таджикски?|Шумо бо забони тоҷикӣ гап зада метавонед?","我正在学习汉语。|Wǒ zhèngzài xuéxí Hànyǔ.|Я изучаю китайский язык.|Ман забони чиниро меомӯзам."]]];\nconversationTopics.push(...extendedTopics);\nfunction renderTopics(){ $('conversationHome').classList.remove('hide');$('conversationDetail').classList.add('hide');const q=($('topicSearch').value||'').toLowerCase();$('topicList').innerHTML=conversationTopics.map((t,i)=>({t,i})).filter(x=>(x.t[0]+' '+x.t[1]).toLowerCase().includes(q)).map(x=>'<button class="card topic-card" data-topic="'+x.i+'"><div class="eyebrow">ТЕМА ДЛЯ ОБЩЕНИЯ '+(x.i+1)+'</div><b>'+esc(x.t[0])+'</b><div class="small">'+esc(x.t[1])+'</div><div class="small">'+x.t[2].length+' ибора барои машқ</div></button>').join('');}
 function openTopic(i){const t=conversationTopics[i];$('conversationHome').classList.add('hide');$('conversationDetail').classList.remove('hide');$('conversationTitle').textContent=t[0];$('conversationDescription').textContent=t[1];$('scenarioList').innerHTML=t[2].map((p,j)=>{const a=p.split('|');return '<div class="card"><div class="eyebrow">СУҲБАТ · ҶУМЛА '+(j+1)+'</div><div class="phrase"><div class="han">'+esc(a[0])+'</div><div class="pinyin">'+esc(a[1])+'</div><div>'+esc(a[2])+'</div><div class="muted">'+esc(a[3])+'</div><button class="secondary" data-phrase="'+esc(a[0])+'">🔊 Прослушать</button></div></div>';}).join('');}
 function renderProgress(){
- const read=readIds.size,total=words.length,pct=total?Math.round(read/total*100):0;
+ const read=readIds.size,total=totalWordCount||11000,pct=total?Math.round(read/total*100):0;
  $('progressSummary').textContent=read.toLocaleString()+' аз '+total.toLocaleString()+' калима';
- $('progressBar').style.width=pct+'%';$('progressText').textContent=completed.size+' дарс анҷом ёфт · '+pct+'% аз рӯйхати умумӣ';
- $('levelProgress').innerHTML=levels.map(lv=>{const n=lv.words.filter(w=>readIds.has(keyOf(w))).length;return '<div class="card"><div class="row"><b>'+esc(lv.name)+'</b><span class="muted">'+n+'/'+lv.words.length+'</span></div><div class="progress"><span style="width:'+(lv.words.length?n/lv.words.length*100:0)+'%"></span></div></div>';}).join('');
+ $('progressBar').style.width=pct+'%';
+ $('progressText').textContent=completed.size+' дарс анҷом ёфт · '+pct+'% аз рӯйхати умумӣ';
+ $('levelProgress').innerHTML=levels.map((lv,i)=>{
+  const meta=levelManifest.levels[i],loaded=lv.words.length>0;
+  const n=loaded?lv.words.filter(w=>readIds.has(keyOf(w))).length:0;
+  return '<div class="card"><div class="row"><b>'+esc(lv.name)+'</b><span class="muted">'+(loaded?n+'/'+meta.wordCount:'Боргирӣ нашудааст')+'</span></div><div class="progress"><span style="width:'+(loaded&&meta.wordCount?n/meta.wordCount*100:0)+'%"></span></div></div>';
+ }).join('');
 }
 
 function playLessonCompleteSound(){
@@ -436,7 +476,7 @@ document.addEventListener('click',e=>{
  if(t.dataset.levelDownload!==undefined){
   const i=Number(t.dataset.levelDownload);
   t.disabled=true;t.textContent='Зеркашӣ шуда истодааст…';
-  saveLevelOffline(i).catch(err=>{alert('Хатои нигоҳдорӣ: '+err.message);t.disabled=false;t.textContent='↓ Ба телефон зеркашӣ кардан';});
+  downloadLevel(i,t);
   return;
  }
  if(t.dataset.action==='levels'){go('levels');return;}
