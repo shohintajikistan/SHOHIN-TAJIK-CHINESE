@@ -37,11 +37,27 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle b){
       super.onCreate(b);
       getWindow().setStatusBarColor(BG); getWindow().setNavigationBarColor(BG);
+      getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+      applyImmersiveMode();
       android.content.SharedPreferences p=getPreferences(0);
       completed=new HashSet<>(p.getStringSet("completed",new HashSet<>()));
       favorites=new HashSet<>(p.getStringSet("favorites",new HashSet<>()));
       tts=new TextToSpeech(this,status->{if(status==TextToSpeech.SUCCESS){int r=tts.setLanguage(Locale.SIMPLIFIED_CHINESE);ttsReady=r!=TextToSpeech.LANG_MISSING_DATA&&r!=TextToSpeech.LANG_NOT_SUPPORTED;}});
       showHome();
+    }
+    void applyImmersiveMode(){
+      getWindow().getDecorView().setSystemUiVisibility(
+        View.SYSTEM_UI_FLAG_FULLSCREEN |
+        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+      );
+    }
+    @Override public void onWindowFocusChanged(boolean hasFocus){
+      super.onWindowFocusChanged(hasFocus);
+      if(hasFocus)applyImmersiveMode();
     }
     void speak(String text){
       if(tts!=null&&ttsReady){
@@ -74,12 +90,12 @@ public class MainActivity extends Activity {
       b.setPadding(dp(12),dp(8),dp(12),dp(8));return b;
     }
     void base(String title,String subtitle,String active){
-      root=column();root.setBackgroundColor(BG);setContentView(root);
+      root=column();root.setBackgroundColor(BG);root.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));setContentView(root);
       LinearLayout head=column();head.setPadding(dp(20),dp(13),dp(20),dp(13));head.setBackgroundColor(PANEL);
       TextView brand=label("♛  SHOHIN TAJIKISTAN",12,GOLD,true);head.addView(brand);
       TextView h=label(title,23,WHITE,true);head.addView(h);
       head.addView(label(subtitle,12,MUTED,false));root.addView(head);
-      ScrollView sc=new ScrollView(this);sc.setFillViewport(false);body=column();
+      ScrollView sc=new ScrollView(this);sc.setFillViewport(true);sc.setVerticalScrollBarEnabled(false);body=column();
       body.setPadding(dp(17),dp(16),dp(17),dp(22));sc.addView(body);
       root.addView(sc,new LinearLayout.LayoutParams(-1,0,1));
       nav=row();nav.setPadding(dp(5),dp(6),dp(5),dp(6));nav.setBackgroundColor(PANEL);
