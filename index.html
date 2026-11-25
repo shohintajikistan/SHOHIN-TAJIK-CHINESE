@@ -52,7 +52,7 @@ function isComplete(li,si){return completed.has(lessonId(li,si));}
 function allPreviousDone(globalIndex){return globalIndex===0||completed.has(lessons[globalIndex-1].id);}
 function speak(text){if(!('speechSynthesis'in window)){alert('Ин браузер талаффузи овозиро дастгирӣ намекунад.');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='zh-CN';u.rate=.82;speechSynthesis.speak(u);}
 // Версияи кэшро баъди тағйир додани файлҳои луғат зиёд мекунем.
-const DATA_CACHE_NAME='shohin-hsk-data-v1';
+const DATA_CACHE_NAME='shohin-hsk-data-v2';
 const DATA_FILES=['app/src/main/assets/hsk_vocabulary.tsv','app/src/main/assets/hsk_wordbook.tsv'];
 async function getLessonFiles(){
  const urls=DATA_FILES.map(path=>new URL(path,location.href).href);
@@ -372,8 +372,9 @@ async function toggleAmbient(){
 document.getElementById('musicToggle').addEventListener('click',toggleAmbient);
 
 document.addEventListener('click',e=>{
- const t=e.target.closest('[data-action],[data-level],[data-lesson],[data-speak],[data-read],[data-topic],[data-phrase],#finishLesson');
+ const t=e.target.closest('[data-page],[data-action],[data-level],[data-lesson],[data-speak],[data-read],[data-topic],[data-phrase],#finishLesson');
  if(!t)return;
+ if(t.dataset.page){e.preventDefault();go(t.dataset.page);return;}
  if(t.dataset.action==='levels'){go('levels');return;}
  if(t.dataset.action==='backLessons'){openLevel(currentLevel);return;}if(t.dataset.action==='conversationBack'){renderTopics();return;}if(t.dataset.topic!==undefined){openTopic(Number(t.dataset.topic));return;}if(t.dataset.phrase){speak(t.dataset.phrase);return;}
  if(t.dataset.level!==undefined){openLevel(Number(t.dataset.level));return;}
@@ -383,6 +384,13 @@ document.addEventListener('click',e=>{
  if(t.id==='finishLesson'){finishLesson();return;}
 });
 $('dictSearch').addEventListener('input',renderDictionary);$('topicSearch').addEventListener('input',renderTopics);
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register(new URL('sw.js',location.href)).catch(err=>console.warn('Offline mode registration:',err));
+}
+window.addEventListener('error',event=>{
+ const box=$('loadStatus');
+ if(box&&!words.length){box.classList.remove('hide');box.innerHTML='<div class="eyebrow">ХАТОИ БАРНОМА</div><p>Барнома ҳангоми кушодан хато гирифт. Саҳифаро як бор нав кунед.</p><p class="small">'+esc(event.message||'Unknown error')+'</p>';}
+});
 loadData();
 })();
 </script>
