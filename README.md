@@ -1,5 +1,14 @@
 # SHOHIN-TAJIK-CHINESE
 
+## Что добавлено в словарь HSK 3.0
+
+- Полный список из 11 000 слов HSK 3.0 (версия программы 2025 года).
+- Поиск офлайн по китайскому слову, Pinyin и доступному переводу.
+- Для всех 11 000 слов подготовлены таджикское и русское значения, пример на китайском, Pinyin примера и переводы примера.
+- Автоматические переводы помечены как требующие проверки.
+- Озвучивание китайских слов и предложений, избранное.
+
 ## Android APK
 
-The debug APK is built automatically by GitHub Actions on every push to `main`. Download the latest `SHOHIN-TAJIK-CHINESE-debug` artifact from the Actions workflow run.
+APK собирается автоматически через GitHub Actions после обновления ветки `main`.
+Откройте вкладку Actions, выберите последний успешный запуск **Build SHOHIN TAJIK-CHINESE APK** и скачайте артефакт **SHOHIN-TAJIK-CHINESE-release**.
