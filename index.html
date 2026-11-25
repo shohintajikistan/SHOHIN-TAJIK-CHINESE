@@ -395,7 +395,7 @@ async function toggleAmbient(){
 document.getElementById('musicToggle').addEventListener('click',toggleAmbient);
 
 document.addEventListener('click',e=>{
- const t=e.target.closest('[data-page],[data-action],[data-level],[data-lesson],[data-speak],[data-read],[data-topic],[data-phrase],#finishLesson');
+ const t=e.target.closest('[data-page],[data-action],[data-level],[data-level-download],[data-lesson],[data-speak],[data-read],[data-topic],[data-phrase],#finishLesson');
  if(!t)return;
  if(t.dataset.page){e.preventDefault();go(t.dataset.page);return;}
  if(t.dataset.levelDownload!==undefined){
