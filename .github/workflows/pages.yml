@@ -4,6 +4,9 @@ on:
     branches: [main, master]
     paths:
       - 'index.html'
+      - 'sw.js'
+      - 'assets/**'
+      - 'app/src/main/assets/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
